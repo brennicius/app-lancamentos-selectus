@@ -28,6 +28,7 @@
     <script>
         const state = { view: 'home', location: null, action: null, currentQuantities: {} };
         
+        // Lista completa de produtos (Descartes)
         const descartesPadrao = [
             { id: "d1", name: "SANDUICHE DE ATUM", category: "SANDUICHES" },
             { id: "d2", name: "SANDUICHE DE FRANGO COM REQUEIJÃO", category: "SANDUICHES" },
@@ -52,8 +53,8 @@
             { id: "d21", name: "OVERNIGHT 180g", category: "SOBREMESAS" }
         ];
 
-        const cafesBase = ["CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"];
         const amaroCafes = ["EXPRESSO", "CURTO", "DUPLO", "AMERICANO", "CAPPUCCINO", "CAFÉ COM LEITE", "CAFÉ COM LEITE CURTO", "ACHOCOLATO KITKAT", "CAPPUCCINO ALPINO", "ACHOCOLATADO ALPINO", "MOCACCINO DOIS FRADES", "ACHOCOLATADO DOIS FRADES"];
+        const cafesBase = ["CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"];
 
         const menuData = {
             "Agnus": { 
@@ -83,7 +84,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         ${["Agnus", "Izabel", "Amaro", "Portugues"].map(loc => `
                             <button onclick="selectLocation('${loc}')" class="gradient-card p-6 rounded-2xl shadow-lg text-center flex flex-col items-center">
-                                <span class="font-bold text-lg text-white">${loc}</span>
+                                <span class="font-bold text-lg text-gold">${loc}</span>
                             </button>
                         `).join('')}
                     </div>
@@ -91,13 +92,13 @@
             } else if (state.view === 'action') {
                 container.innerHTML = `
                     <div class="space-y-4">
-                        <button onclick="selectAction('cafe')" class="w-full gradient-card p-6 rounded-2xl flex items-center justify-center gap-3">
+                        <button onclick="selectAction('cafe')" class="w-full gradient-card p-6 rounded-2xl flex items-center justify-center gap-3 text-gold">
                             <i data-lucide="coffee"></i> <span class="text-lg">Café</span>
                         </button>
-                        <button onclick="selectAction('descarte')" class="w-full gradient-card p-6 rounded-2xl flex items-center justify-center gap-3">
+                        <button onclick="selectAction('descarte')" class="w-full gradient-card p-6 rounded-2xl flex items-center justify-center gap-3 text-gold">
                             <i data-lucide="trash-2"></i> <span class="text-lg">Descartes</span>
                         </button>
-                        <button onclick="goBack()" class="w-full bg-transparent border border-gray-600 p-4 rounded-xl mt-4">Voltar</button>
+                        <button onclick="goBack()" class="w-full bg-transparent border border-gray-600 p-4 rounded-xl mt-4 text-gray-400">Voltar</button>
                     </div>
                 `;
             } else if (state.view === 'form') {
@@ -111,7 +112,7 @@
             const items = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
             
             container.innerHTML = `
-                <input type="text" id="search" placeholder="Pesquisar produto..." class="w-full p-3 rounded-xl mb-4 bg-gray-800 text-white border border-gray-600" oninput="filterItems()">
+                <input type="text" id="search" placeholder="Pesquisar..." class="w-full p-3 rounded-xl mb-4 bg-gray-800 text-white border border-gray-600" oninput="filterItems()">
                 <div id="form-items" class="space-y-4"></div>
                 <button onclick="saveEntry()" class="w-full bg-gold text-black font-bold p-4 rounded-xl mt-6">Salvar Lançamento</button>
                 <button onclick="goBack()" class="w-full bg-transparent border border-gray-600 p-4 rounded-xl mt-2">Voltar</button>
@@ -122,15 +123,15 @@
                 const name = item.name;
                 const cat = item.cat || item.category;
                 const div = document.createElement('div');
-                div.className = 'item-row bg-white/10 p-3 rounded-xl flex items-center justify-between';
+                div.className = 'item-row bg-white/5 p-3 rounded-xl flex items-center justify-between border border-white/10';
                 div.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="text-sm text-gold">${cat}</span>
-                        <span class="font-medium">${name}</span>
+                        <span class="text-[10px] text-gold uppercase tracking-wider font-bold">${cat}</span>
+                        <span class="font-medium text-sm">${name}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="updateQty('${name}', -1, '${name.replace(/ /g, '_')}')" class="p-2 bg-gray-700 rounded-lg">-</button>
-                        <input type="number" id="${name.replace(/ /g, '_')}" value="0" class="w-16 text-center bg-transparent border-b border-white" onchange="manualUpdate('${name}', this.value)">
+                        <input type="number" id="${name.replace(/ /g, '_')}" value="0" class="w-16 text-center bg-transparent border-b border-gray-500 text-white" onchange="manualUpdate('${name}', this.value)">
                         <button onclick="updateQty('${name}', 1, '${name.replace(/ /g, '_')}')" class="p-2 bg-gold text-black rounded-lg">+</button>
                     </div>
                 `;
@@ -171,14 +172,13 @@
                 }))
             };
 
-            // Substitua pela sua URL do Google Script
             fetch("SUA_URL_DO_GOOGLE_SCRIPT_AQUI", {
                 method: "POST",
                 body: JSON.stringify(payload)
             }).then(() => {
                 state.currentQuantities = {};
-                render();
                 alert("Salvo com sucesso!");
+                goBack();
             });
         }
 
