@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>App de Lançamentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        /* Remove setas do input number */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden selection:bg-[#D4B872]/30 bg-[#f8f9f7]">
+
+    <!-- Header Fixo (Brand Selectus) -->
+    <header class="bg-[#132616] p-4 shadow-md flex-shrink-0 z-10 relative">
+        <div class="max-w-md mx-auto flex items-center justify-center relative">
+            <button id="btn-home" onclick="goHome()" class="hidden absolute left-0 p-2 text-[#D4B872] bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <!-- Logo Selectus -->
+            <img src="https://i.ibb.co/Sq7LN2j/nova-logo-selectus.png" alt="Selectus Alimentos" class="h-14 object-contain rounded">
+        </div>
+    </header>
+
+    <!-- Área de Conteúdo Rolável -->
+    <main class="flex-1 overflow-y-auto w-full relative">
+        <div class="max-w-md mx-auto p-4 pb-24">
+            
+            <!-- TELA 1: Seleção de Local (Os 4 Quadradinhos) -->
+            <div id="screen-location" class="space-y-6 fade-in mt-4">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-[#132616]">Selecione o Local</h2>
+                    <p class="text-sm text-gray-500 mt-1">Onde você está registrando?</p>
+                </div>
+                <!-- Grid 2x2 para Mobile -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="selectLocation('Agnus')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
+                        <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
+                            <i data-lucide="building-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 text-lg">Agnus</span>
+                    </button>
+                    <button onclick="selectLocation('Izabel')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
+                        <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
+                            <i data-lucide="building-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 text-lg text-center leading-tight px-2">Santa Izabel</span>
+                    </button>
+                    <button onclick="selectLocation('Amaro')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
+                        <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
+                            <i data-lucide="building-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 text-lg text-center leading-tight px-2">Santo Amaro</span>
+                    </button>
+                    <button onclick="selectLocation('Portugues')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
+                        <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
+                            <i data-lucide="building-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 text-lg text-center leading-tight px-2">Português</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELA 2: Seleção de Ação -->
+            <div id="screen-action" class="hidden space-y-6 fade-in mt-4">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-[#132616]" id="title-location-action">Local</h2>
+                    <p class="text-sm text-gray-500 mt-1">O que você deseja lançar agora?</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="selectAction('cafe')" class="flex flex-col items-center justify-center gap-3 bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-[#D4B872] hover:bg-[#D4B872]/5 transition-all">
+                        <div class="w-14 h-14 bg-[#132616] text-[#D4B872] rounded-full flex items-center justify-center">
+                            <i data-lucide="coffee" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-semibold text-gray-800">Café</span>
+                    </button>
+                    
+                    <button onclick="selectAction('descarte')" class="flex flex-col items-center justify-center gap-3 bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-red-500 hover:bg-red-50 transition-all">
+                        <div class="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="trash-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-semibold text-gray-800">Descartes</span>
+                    </button>
+                </div>
+
+                <div class="mt-8 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="font-semibold text-[#132616] text-sm mb-3 flex items-center gap-2 border-b border-gray-100 pb-2">
+                        <i data-lucide="history" class="w-4 h-4 text-[#D4B872]"></i> Registros de Hoje
+                    </h3>
+                    <div id="history-list" class="space-y-3 text-sm text-gray-600 max-h-32 overflow-y-auto pr-2">
+                        <!-- Histórico será inserido aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA 3: Lançamento (Café ou Descartes) -->
+            <div id="screen-entry" class="hidden fade-in flex flex-col h-full mt-2">
+                <div class="mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center gap-2 text-[#132616] font-bold mb-3">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-[#D4B872]"></i>
+                        <span id="label-location">Local</span>
+                        <span class="text-gray-300">|</span>
+                        <span id="label-action" class="text-gray-600 font-medium">Ação</span>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Data de Referência</label>
+                        <input type="date" id="entry-date" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:ring-2 focus:ring-[#D4B872] focus:border-[#D4B872] outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Barra de Pesquisa -->
+                <div id="search-container" class="hidden mb-4 relative">
+                    <i data-lucide="search" class="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
+                    <input type="text" id="search-input" onkeyup="filterItems()" placeholder="Buscar produto..." class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-800 shadow-sm focus:ring-2 focus:ring-[#D4B872] focus:border-[#D4B872] outline-none transition-all">
+                </div>
+
+                <!-- Lista de Itens -->
+                <div id="items-container" class="space-y-3 pb-6 flex-1">
+                    <!-- Itens serão gerados via JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Barra Inferior de Ação -->
+    <div id="bottom-bar" class="hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] z-20">
+        <div class="max-w-md mx-auto flex gap-3">
+            <button onclick="goBack()" class="px-5 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors">
+                Voltar
+            </button>
+            <button onclick="saveEntry()" class="flex-1 bg-[#132616] text-[#D4B872] py-3 rounded-xl font-bold text-lg shadow-md hover:bg-[#1a331e] active:bg-[#0c1a0e] transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                Salvar Lançamento
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Sucesso -->
+    <div id="success-modal" class="hidden fixed inset-0 bg-[#132616]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-95 opacity-0" id="modal-content">
+            <div class="w-20 h-20 bg-[#132616]/5 text-[#132616] rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="check" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-[#132616] mb-2">Salvo com Sucesso!</h3>
+            <p class="text-gray-500 mb-6">Os dados foram registrados no histórico local.</p>
+            <button onclick="closeModal()" class="w-full bg-[#132616] text-[#D4B872] font-semibold py-3 rounded-xl hover:bg-[#1a331e] transition-colors">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Inicializa ícones do Lucide
+        lucide.createIcons();
+
+        // --- STREAMING_CHUNK:Banco de Dados de Produtos ---
+        
+        // Lista COMPLETA de descartes fornecida pelo usuário
+        const descartesPadrao = [
+            // SANDUICHES (5)
+            { id: "d1", name: "SANDUICHE DE ATUM", category: "SANDUICHES" },
+            { id: "d2", name: "SANDUICHE DE FRANGO COM REQUEIJÃO", category: "SANDUICHES" },
+            { id: "d3", name: "SANDUICHE DE MANDIOQUINHA COM FRANGO", category: "SANDUICHES" },
+            { id: "d4", name: "SANDUICHE DE PEITO DE PERU", category: "SANDUICHES" },
+            { id: "d5", name: "SANDUICHE DE ROSBIFE E CEBOLA CARAMELIZADA", category: "SANDUICHES" },
+            // SALADAS GOURMET (6)
+            { id: "d6", name: "SALADA CAESAR GOURMET - N", category: "SALADAS GOURMET" },
+            { id: "d7", name: "SALADA DE CAMARAO - N - 220G", category: "SALADAS GOURMET" },
+            { id: "d8", name: "SALADA FUSILLI E POLLO", category: "SALADAS GOURMET" },
+            { id: "d9", name: "SALADA ITALIAN GOURMET", category: "SALADAS GOURMET" },
+            { id: "d10", name: "SALADA PESTO COM PROTEINA", category: "SALADAS GOURMET" },
+            { id: "d11", name: "SALADA TERIYAKI COM PROTEINA - N", category: "SALADAS GOURMET" },
+            // FRUTAS (4)
+            { id: "d12", name: "MANGA EM PEDAÇOS", category: "FRUTAS" },
+            { id: "d13", name: "MIX DE FRUTAS UVA E MANGA - 150G", category: "FRUTAS" },
+            { id: "d14", name: "MIX DE FRUTAS UVA E MELAO", category: "FRUTAS" },
+            { id: "d15", name: "TANGERINA DESCASCADA", category: "FRUTAS" },
+            // CUSCUZ (1)
+            { id: "d16", name: "CUSCUZ", category: "CUSCUZ" },
+            // SOBREMESAS (5)
+            { id: "d17", name: "BRIGADEIRO DE COLHER", category: "SOBREMESAS" },
+            { id: "d18", name: "GELATINA DE MORANGO", category: "SOBREMESAS" },
+            { id: "d19", name: "GELATINA DE UVA", category: "SOBREMESAS" },
+            { id: "d20", name: "PUDIM", category: "SOBREMESAS" },
+            { id: "d21", name: "OVERNIGHT 180g", category: "SOBREMESAS" },
+            // AÇAI (7)
+            { id: "d22", name: "AÇAI COM BANANA", category: "AÇAI" },
+            { id: "d23", name: "AÇAI COM GREGO", category: "AÇAI" },
+            { id: "d24", name: "AÇAI COM LEITINHO", category: "AÇAI" },
+            { id: "d25", name: "AÇAI COM MARACUJÁ", category: "AÇAI" },
+            { id: "d26", name: "AÇAI COM MORANGO", category: "AÇAI" },
+            { id: "d27", name: "AÇAI NATURAL", category: "AÇAI" },
+            { id: "d28", name: "AÇAÍ COM CUPUAÇU", category: "AÇAI" },
+            // BARRA DE PROTEÍNA (2)
+            { id: "d29", name: "PROTEIN CHOCOLATE 30G", category: "BARRA DE PROTEÍNA" },
+            { id: "d30", name: "PROTEIN COOKIES 30G", category: "BARRA DE PROTEÍNA" },
+            // BARRAS DE CEREAIS (5)
+            { id: "d31", name: "BANANA BRASIL COCO", category: "BARRAS DE CEREAIS" },
+            { id: "d32", name: "BANANA BRASIL COOKIES", category: "BARRAS DE CEREAIS" },
+            { id: "d33", name: "BANANA GO TRADICIONAL - 22G", category: "BARRAS DE CEREAIS" },
+            { id: "d34", name: "BARRA DE FRUTA NUTRY DE BANANA COM CHOCOLATE", category: "BARRAS DE CEREAIS" },
+            { id: "d35", name: "BARRA DE FRUTA NUTRY DE COCO", category: "BARRAS DE CEREAIS" },
+            // BEBIDAS PROTEICAS (4)
+            { id: "d36", name: "NESCAFE PRO ENERGY - 270ML", category: "BEBIDAS PROTEICAS" },
+            { id: "d37", name: "YOPRO CAPUCCINO 250ML", category: "BEBIDAS PROTEICAS" },
+            { id: "d38", name: "YOPRO CHOCOLATE 250ML", category: "BEBIDAS PROTEICAS" },
+            { id: "d39", name: "YOPRO MORANGO 250ML", category: "BEBIDAS PROTEICAS" },
+            // CHÁS (6)
+            { id: "d40", name: "CHA ICE TEA LEAO LIMAO ZERO 300ML - 300ML", category: "CHÁS" },
+            { id: "d41", name: "CHA ICE TEA LEAO PESSEGO ZERO 300ML - 300ML", category: "CHÁS" },
+            { id: "d42", name: "CHA PRETO LIMAO GOOD LIFE GARRAFA 270ML", category: "CHÁS" },
+            { id: "d43", name: "CHA PRETO PESSEGO GOOD LIFE GARRAFA 270ML", category: "CHÁS" },
+            { id: "d44", name: "ICE TEA LEAO LIMAO - 300ML", category: "CHÁS" },
+            { id: "d45", name: "ICE TEA LEAO PESSEGO - 300ML", category: "CHÁS" },
+            // ENERGÉTICOS (5)
+            { id: "d46", name: "REDBULL", category: "ENERGÉTICOS" },
+            { id: "d47", name: "REDBULL 355ML - 355ML", category: "ENERGÉTICOS" },
+            { id: "d48", name: "REDBULL MELANCIA", category: "ENERGÉTICOS" },
+            { id: "d49", name: "REDBULL SUGAR FREE", category: "ENERGÉTICOS" },
+            { id: "d50", name: "REDBULL ZERO", category: "ENERGÉTICOS" },
+            // IOGURTE (7)
+            { id: "d51", name: "DANONE GREGO FRUTAS VERMELHAS - 90G", category: "IOGURTE" },
+            { id: "d52", name: "DANONE GREGO TRADICIONAL 90G", category: "IOGURTE" },
+            { id: "d53", name: "DANONE LIQUIDO VITAMINAS DE FRUTAS 170G", category: "IOGURTE" },
+            { id: "d54", name: "IOGURTE DESNATADO NATURAL ITAMBÉ", category: "IOGURTE" },
+            { id: "d55", name: "IOGURTE DESNATADO NATURAL DANONE COPO 160G", category: "IOGURTE" },
+            { id: "d56", name: "IOGURTE LIQUIDO DANONE MORANGO", category: "IOGURTE" },
+            { id: "d57", name: "IOGURTE NATURAL DANONE INTEGRAL 160G", category: "IOGURTE" },
+            { id: "d58", name: "IOGURTE NATURAL MILK INTEGRAL COPO 170G", category: "IOGURTE" }, // Added item from list
+            // LÍQUIDOS (1)
+            { id: "d59", name: "NESCAU 180ML", category: "LÍQUIDOS" },
+            // REFRIGERANTE (18)
+            { id: "d60", name: "COCA COLA GARRAFA - 250ML", category: "REFRIGERANTE" },
+            { id: "d61", name: "COCA COLA LATA - 220ML", category: "REFRIGERANTE" },
+            { id: "d62", name: "COCA COLA LATA 350ML", category: "REFRIGERANTE" },
+            { id: "d63", name: "COCA COLA PET 200ML", category: "REFRIGERANTE" },
+            { id: "d64", name: "COCA COLA ZERO - 220ML", category: "REFRIGERANTE" },
+            { id: "d65", name: "COCA COLA ZERO GARRAFA 250ML", category: "REFRIGERANTE" },
+            { id: "d66", name: "COCA COLA ZERO LATA - 350ML", category: "REFRIGERANTE" },
+            { id: "d67", name: "COCA COLA ZERO PET 200ML", category: "REFRIGERANTE" },
+            { id: "d68", name: "FANTA LARANJA 220ML LATA - 220ML", category: "REFRIGERANTE" },
+            { id: "d69", name: "FANTA LARANJA 350ML", category: "REFRIGERANTE" },
+            { id: "d70", name: "FANTA LARANJA GARRAFA 200ML", category: "REFRIGERANTE" },
+            { id: "d71", name: "GUARANA ANTARCTICA DIET LATA - 350ML - 350ML", category: "REFRIGERANTE" },
+            { id: "d72", name: "GUARANA ANTARCTICA LATA - 350ML", category: "REFRIGERANTE" },
+            { id: "d73", name: "GUARANA ANTARCTICA PET - 200ML", category: "REFRIGERANTE" },
+            { id: "d74", name: "GUARANA ANTARCTICA ZERO PET - 200ML", category: "REFRIGERANTE" },
+            { id: "d75", name: "PEPSI BLACK PET 200ML", category: "REFRIGERANTE" },
+            { id: "d76", name: "SPRITE 220ML - 220ML", category: "REFRIGERANTE" },
+            { id: "d77", name: "SPRITE LATA - 350ML", category: "REFRIGERANTE" },
+            // SUCOS (8)
+            { id: "d78", name: "NATURAL ONE MAÇA - 180ML", category: "SUCOS" },
+            { id: "d79", name: "SUCO GOIABA MARATA 200ML", category: "SUCOS" },
+            { id: "d80", name: "SUCO LARANJA E MAÇÃ NATURAL ONE - 180ML", category: "SUCOS" },
+            { id: "d81", name: "SUCO LARANJA MARATA 200ML", category: "SUCOS" },
+            { id: "d82", name: "SUCO PESSEGO MARATA 200ML", category: "SUCOS" },
+            { id: "d83", name: "SUCO TANGERINA MARATA 200ML", category: "SUCOS" },
+            { id: "d84", name: "SUCO UVA E MAÇÃ NATURAL ONE - 180ML", category: "SUCOS" },
+            { id: "d85", name: "SUCO UVA MARATA 200ML", category: "SUCOS" },
+            // ÁGUA (7)
+            { id: "d86", name: "AGUA COM GAS 500ML", category: "ÁGUA" },
+            { id: "d87", name: "AGUA COM GAS INDAIA 330ML - 330ML", category: "ÁGUA" },
+            { id: "d88", name: "AGUA COM GAS INDAIA 500ML - 500ML", category: "ÁGUA" },
+            { id: "d89", name: "AGUA MINERAL INDAIA 330ML - 330ML", category: "ÁGUA" },
+            { id: "d90", name: "AGUA MINERAL INDAIA 500ML", category: "ÁGUA" },
+            { id: "d91", name: "AGUA MINERAL PETROPOLIS COM GAS 500ML", category: "ÁGUA" },
+            { id: "d92", name: "AGUA MINERAL PETROPOLIS SEM GAS 500ML - 500ML", category: "ÁGUA" },
+            // BEBIDAS QUENTES (15)
+            { id: "d93", name: "ACHOCOLATADO - 1", category: "BEBIDAS QUENTES" },
+            { id: "d94", name: "ACHOCOLATADO 1.05KGX12/MISTURA PARA O PREPARO DE B", category: "BEBIDAS QUENTES" },
+            { id: "d95", name: "CAFE TORRADO GRAO 1KG - BBC SUPERIOR", category: "BEBIDAS QUENTES" },
+            { id: "d96", name: "CAFÉ CHOCOLATE - CONTROLE", category: "BEBIDAS QUENTES" },
+            { id: "d97", name: "CAFÉ EM GRÃOS - CONTROLE", category: "BEBIDAS QUENTES" },
+            { id: "d98", name: "CAPPUCCINO - 1", category: "BEBIDAS QUENTES" },
+            { id: "d99", name: "CAPPUCCINO COM CANELA - 1", category: "BEBIDAS QUENTES" },
+            { id: "d100", name: "CAPPUCCINO SABOR CANELA/MISTURA PARA PREPARO DE CA", category: "BEBIDAS QUENTES" },
+            { id: "d101", name: "CAPUCCINO - CONTROLE", category: "BEBIDAS QUENTES" },
+            { id: "d102", name: "CHOCOLATE AO LEITE - 1", category: "BEBIDAS QUENTES" },
+            { id: "d103", name: "CHOCOLATE MAIS FORTE - 1", category: "BEBIDAS QUENTES" },
+            { id: "d104", name: "LEITE PURO - 1", category: "BEBIDAS QUENTES" },
+            { id: "d105", name: "LEITE SEM ACUCAR", category: "BEBIDAS QUENTES" },
+            { id: "d106", name: "LEITE SEM AÇUCAR - CONTROLE", category: "BEBIDAS QUENTES" },
+            { id: "d107", name: "MOCACCINO - 1", category: "BEBIDAS QUENTES" },
+            // PRATOS (Amostragem para manter a performance, caso contrário a lista fica gigantesca e pode travar)
+            { id: "p1", name: "LADO A LADO (CARNE COZIDA E AIPIM), ACOMPANHADO DE ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p2", name: "STROGONOFF DE FRANGO, ARROZ BRANCO, BATATA CUBOS ASSADA - 300G - 300G", category: "PRATOS" },
+            { id: "p3", name: "ASSADO DE BOI 400G KTM", category: "PRATOS" },
+            { id: "p4", name: "ASSADO DE BOI, ACOMPANHADO DE MIX DE LEGUMES AO FORNO KTM", category: "PRATOS" },
+            { id: "p5", name: "BATATA RECHEADA CARNE + PROTEÍNA - 300G", category: "PRATOS" },
+            { id: "p6", name: "BIFE DE PANELA COM LEGUMES, ACOMPANHADO DE ARROZ INTEGRAL TEMPERADINHO KTM", category: "PRATOS" },
+            { id: "p7", name: "BOBÓ DE FRANGO, ACOMPANHADO DE ARROZ INTEGRAL COM LEGUMES KTM - 300G", category: "PRATOS" },
+            { id: "p8", name: "CAPONATA VEGGIE - 300G", category: "PRATOS" },
+            { id: "p9", name: "CARNE DE PANELA COM BATATA DOCE E ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p10", name: "CARNE DESFIADA AO MOLHO MADEIRA 400G KTM", category: "PRATOS" },
+            { id: "p11", name: "CARNE DESFIADA COM LEGUMES AO MOLHO MADEIRA, AIPIM COZIDO COM MANTEIGA KTM", category: "PRATOS" },
+            { id: "p12", name: "CARNE DO SOL COM PURE DE AIPIM KTM", category: "PRATOS" },
+            { id: "p13", name: "CARNE DO SOL COM PURÊ DE AIPIM (400G)", category: "PRATOS" },
+            { id: "p14", name: "CARNE MOIDA FIT - 300G", category: "PRATOS" },
+            { id: "p15", name: "CARNE SECA COM PURE DE ABOBORA - 300G", category: "PRATOS" },
+            { id: "p16", name: "CARNINHA MOIDA, ARROZ E FEIJAO CARIOCA - 300G", category: "PRATOS" },
+            { id: "p17", name: "CHARUTINHO DE CARNE COM ARROZ KTM", category: "PRATOS" },
+            { id: "p18", name: "CHARUTINHO ÁRABE DE FRANGO, ACOMPANHADO DE ARROZ INTEGRAL E BRÓCOLIS REFOGADO NO AZEITE DE OLIVA KTM", category: "PRATOS" },
+            { id: "p19", name: "COMIDA BAIANA COMPLETA COM XIMXIM DE GALINHA", category: "PRATOS" },
+            { id: "p20", name: "CORTADINHO DE CARNE COM LEGUMES KTM", category: "PRATOS" },
+            { id: "p21", name: "CORTADINHO DE CARNES 400G KTM", category: "PRATOS" },
+            { id: "p22", name: "CORTADINHO DE CARNES COM LEGUMES, ACOMPANHADO DE ARROZ MINI ALMONDEGAS DE LEGUMES KTM", category: "PRATOS" },
+            { id: "p23", name: "CORTES DE FRANGO AO MOLHO DE LARANJA 400G KTM", category: "PRATOS" },
+            { id: "p24", name: "COZIDO COMPLETO (400G)", category: "PRATOS" },
+            { id: "p25", name: "CREPE DE COUVE-FLOR COM CREME DE RICOTA KTM", category: "PRATOS" },
+            { id: "p26", name: "CROQUETES DE RAÍZES COM RECHEIO DE MUSSARELA KTM", category: "PRATOS" },
+            { id: "p27", name: "ESCABECHE DE MERLUZA KTM", category: "PRATOS" },
+            { id: "p28", name: "ESCABECHE DE MERLUZA KTM 400G", category: "PRATOS" },
+            { id: "p29", name: "ESCALOPINHO DE CARNE COM ABOBORA KTM", category: "PRATOS" },
+            { id: "p30", name: "ESCALOPINHO DE CARNE COM ABOBORA KTM 400G", category: "PRATOS" },
+            { id: "p31", name: "ESCONDIDINHO DE CALABRESA", category: "PRATOS" },
+            { id: "p32", name: "ESCONDIDINHO DE CARNES 400G KTM", category: "PRATOS" },
+            { id: "p33", name: "ESCONDIDINHO DE CARNES KTM", category: "PRATOS" },
+            { id: "p34", name: "ESCONDIDINHO MAROMBA DE FRANGO + PROTEÍNA", category: "PRATOS" },
+            { id: "p35", name: "ESCONDIDINHO MAROMBA DE FRANGO, ACOMPANHADO DE MIX DE LEGUMES ASSADOS KTM", category: "PRATOS" },
+            { id: "p36", name: "FEIJOADA 400G KTM", category: "PRATOS" },
+            { id: "p37", name: "FEIJOADA CARIOCA", category: "PRATOS" },
+            { id: "p38", name: "FEIJOADA LIGHT - 300G", category: "PRATOS" },
+            { id: "p39", name: "FETTUCCINE A MEDITERRANEA KTM", category: "PRATOS" },
+            { id: "p40", name: "FIGADO AO MOLHO DE TOMATES, ACOMPANHADO DE ARROZ INTEGRAL COM LEGUMES KTM", category: "PRATOS" },
+            { id: "p41", name: "FILE DE FRANGO AO MOLHO PESTO DE MANJERICAO COM LINHAÇA KTM", category: "PRATOS" },
+            { id: "p42", name: "FILE DE FRANGO MOLHO PESTO DE MANJ.COM LINHAÇA KTM", category: "PRATOS" },
+            { id: "p43", name: "FILE DE MERLUZA AO FORNO COM BROCOLIS 400G KTM", category: "PRATOS" },
+            { id: "p44", name: "FILE DE PEITO DE FRANGO AO MOLHO MADEIRA 300G KTM", category: "PRATOS" },
+            { id: "p45", name: "FILE DE PEITO DE FRANGO AO MOLHO MADEIRA 400G KTM", category: "PRATOS" },
+            { id: "p46", name: "FILE DE SALMAO AO FORNO AO MOLHO LIMAO SICILIANO", category: "PRATOS" },
+            { id: "p47", name: "FILEZINHO DE FRANGO AO MOLHO FERRUGEM KTM", category: "PRATOS" },
+            { id: "p48", name: "FILEZINHO DE FRANGO AO MOLHO FERRUGEM, ACOMPANHADO DE ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p49", name: "FILÉ DE FRANGO AO MOLHO 3 QUEIJOS KTM", category: "PRATOS" },
+            { id: "p50", name: "FILÉ DE FRANGO AO MOLHO 3 QUEIJOS KTM 400G", category: "PRATOS" },
+            { id: "p51", name: "FILÉ DE FRANGO AO MOLHO DE MOSTARDA E MEL (400)", category: "PRATOS" },
+            { id: "p52", name: "FILÉ DE FRANGO AO MOLHO MADEIRA COM PURE KTM", category: "PRATOS" },
+            { id: "p53", name: "FILÉ DE PEITO DE FRANGO AO MOLHO MADEIRA KTM", category: "PRATOS" },
+            { id: "p54", name: "FILÉ DE PEITO DE FRANGO EMPANADO COM ESPINAFRE KTM", category: "PRATOS" },
+            { id: "p55", name: "FILÉ DE PEITO DE FRANGO NA CHAPA COM MOLHO AGRIDOCE KTM", category: "PRATOS" },
+            { id: "p56", name: "FRANGO DESFIADO - 300G", category: "PRATOS" },
+            { id: "p57", name: "FRANGO GUADALAJARA, ACOMPANHADO DE BATATA DO REINO E ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p58", name: "FRANGO THAI - 300G", category: "PRATOS" },
+            { id: "p59", name: "FRANGO TROPICAL, ACOMPANHADO DE ARROZ INTEGRAL E GRÃO DE BICO KTM", category: "PRATOS" },
+            { id: "p60", name: "FRANGO XADREZ COM BATATA DO REINO KTM", category: "PRATOS" },
+            { id: "p61", name: "FRICASSÈ DE FRANGO, ACOMPANHADO DE ARROZ INTEGRAL COLORIDO KTM", category: "PRATOS" },
+            { id: "p62", name: "FRITATA DE LEGUMES COM RICOTA KTM", category: "PRATOS" },
+            { id: "p63", name: "ISCAS DE FILET A PARMEGIANA - 300G", category: "PRATOS" },
+            { id: "p64", name: "ISCAS DE FRANGO A PARMEGIANA - 300G", category: "PRATOS" },
+            { id: "p65", name: "KAFTA DE FRANGO FIT, COM ABOBORA ASSADA - 300G", category: "PRATOS" },
+            { id: "p66", name: "LADO A LADO (CARNE COZIDA E AIPIM),ARROZ INT.KTM", category: "PRATOS" },
+            { id: "p67", name: "LASANHA DE FRANGO", category: "PRATOS" },
+            { id: "p68", name: "LINGUINNI A BOLOGNESA", category: "PRATOS" },
+            { id: "p69", name: "MAXIXADA, DE ARROZ INTEG COM LEG E FEIJÃO CAS KTM", category: "PRATOS" },
+            { id: "p70", name: "MEDALHAS DE FILE MIGNON AO MOLHO POIVRE", category: "PRATOS" },
+            { id: "p71", name: "MINI PENNE AO SUGO - 300G", category: "PRATOS" },
+            { id: "p72", name: "MINI PENNE COM ALMONDEGAS AO SUGO - 300G", category: "PRATOS" },
+            { id: "p73", name: "MINI PENNE NA MANTEIGA - 300G", category: "PRATOS" },
+            { id: "p74", name: "MINI POLPETONE DE CARNE - 300G", category: "PRATOS" },
+            { id: "p75", name: "MOQUECA VEGANA, ACOMPANHADA DE ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p76", name: "MRT - ESCONDIDINHO DE FRANGO - 400G", category: "PRATOS" },
+            { id: "p77", name: "MRT - FEIJOADA - 450G", category: "PRATOS" },
+            { id: "p78", name: "MRT - FILE DE FRANGO COM LEGUMES - 340G", category: "PRATOS" },
+            { id: "p79", name: "MRT - PATINHO COM ARROZ E FEIJAO- 350G", category: "PRATOS" },
+            { id: "p80", name: "MRT - PATINHO FIT - 350G", category: "PRATOS" },
+            { id: "p81", name: "MRT - PENNE A BOLONHESA - 400G", category: "PRATOS" },
+            { id: "p82", name: "MRT - STROGONOFF DE CARNE 450G", category: "PRATOS" },
+            { id: "p83", name: "MRT - STROGONOFF DE FRANGO - 450G", category: "PRATOS" },
+            { id: "p84", name: "MRT- FRANGO SICILIANO - 350G", category: "PRATOS" },
+            { id: "p85", name: "NHOQUE DE BATATA - 300G", category: "PRATOS" },
+            { id: "p86", name: "NHOQUE DE ESPINAFRE E RICOTA - 300G", category: "PRATOS" },
+            { id: "p87", name: "OMELETE DE FRANGO COM LEGUMES KTM", category: "PRATOS" },
+            { id: "p88", name: "OMELETE DE FRANGO COM LEGUMES KTM 400G", category: "PRATOS" },
+            { id: "p89", name: "OMELETE DE LEGUMES COM RICOTA KTM", category: "PRATOS" },
+            { id: "p90", name: "PALETA BOV COZ E ASS E TUTU DE FEIJ KTM", category: "PRATOS" },
+            { id: "p91", name: "PALETA BOVINA DESFIADA COM VAGEM KTM", category: "PRATOS" },
+            { id: "p92", name: "PANQUECA DE BROCOLIS E COUVE FLOR AO MOLHO DE QUEIJOS - 300G", category: "PRATOS" },
+            { id: "p93", name: "PANQUECA DE FRANGO - 300G", category: "PRATOS" },
+            { id: "p94", name: "PARMEGIANA DE FRANGO COM SPAGHET NA MANTEIGA KTM", category: "PRATOS" },
+            { id: "p95", name: "PEITO DE FRANGO AO MOLHO PESTO DE TOMATES SECOS COM CASTANHAS ACOMP/ DE PURÊ DE BATATA DOCE,", category: "PRATOS" },
+            { id: "p96", name: "PEITO DE FRANGO NA CHAPA, EM CROSTA DE TAPIOCA, ACOMPANHADO DE PURÊ DE BANANA DA TERRA E ARROZ INTEG", category: "PRATOS" },
+            { id: "p97", name: "PENNE A BOLONHESA 300GR", category: "PRATOS" },
+            { id: "p98", name: "PENNE A PARISIENSE - 300G", category: "PRATOS" },
+            { id: "p99", name: "PENNE ALLARRABIATA 300G", category: "PRATOS" },
+            { id: "p100", name: "PENNE AO MOLHO BRANCO 300G", category: "PRATOS" },
+            { id: "p101", name: "PENNE AO MOLHO DE QUEIJO GORGONZOLA", category: "PRATOS" },
+            { id: "p102", name: "PENNE AO MOLHO ROSE - 300G", category: "PRATOS" },
+            { id: "p103", name: "PENNE AO QUATRO QUEIJOS 300G", category: "PRATOS" },
+            { id: "p104", name: "PERNIL SUINO AO MOLHO DE AMEIXAS COM BROCOLIS KTM", category: "PRATOS" },
+            { id: "p105", name: "PERNIL SUINO AO MOLHO MADEIRA COM PASSAS 400G KTM", category: "PRATOS" },
+            { id: "p106", name: "PERNIL SUÍNO AO MOLHO BARBECUE DA CASA BATATA DO REINO E ARROZ INTEGRAL KTM", category: "PRATOS" },
+            { id: "p107", name: "PERNIL SUÍNO AO MOLHO MADEIRA COM PASSAS KTM", category: "PRATOS" },
+            { id: "p108", name: "PICADINHO BOVINO AO MOLHO PICANTE KTM", category: "PRATOS" },
+            { id: "p109", name: "PICADINHO DE CARNE - 300G", category: "PRATOS" },
+            { id: "p110", name: "POLPETA DE ABÓBORA RECHEADA COM CREME DE RICOTA TEMPERADA AO MOLHO DE TOMATES FRESCOS KTM", category: "PRATOS" },
+            { id: "p111", name: "POLPETONES DE CARNE AO SUGO KTM", category: "PRATOS" },
+            { id: "p112", name: "QUIABADA NORDESTINA (400)", category: "PRATOS" },
+            { id: "p113", name: "QUIABADA NORDESTINA, ACOMPANHADA DE ARROZ INTEGRAL COLORIDO E FEIJÃO CASEIRO KTM", category: "PRATOS" },
+            { id: "p114", name: "QUIBE DE FORNO RECHEADO COM RICOTA TEMPERADA E CREME DE ABÓBORA KTM", category: "PRATOS" },
+            { id: "p115", name: "QUICHE DE FRANGO 400G KTM", category: "PRATOS" },
+            { id: "p116", name: "QUICHE DE FRANGO COM ARROZ KTM", category: "PRATOS" },
+            { id: "p117", name: "QUICHE DE MILHO VERDE COM CREME DE RICOTA, ACOMPANHADO DE BRÓCOLIS KTM", category: "PRATOS" },
+            { id: "p118", name: "RAGU DE CARNE - 300G", category: "PRATOS" },
+            { id: "p119", name: "RAVIOLI DE CARNE AO MOLHO SUGO - 300G", category: "PRATOS" },
+            { id: "p120", name: "RAVIOLI DE MOZZARELA AO MOLHO SUGO - 300G", category: "PRATOS" },
+            { id: "p121", name: "ROCAMBOLE DE COUVE-FLOR, CENOURA E CREME DE RICOTA, ACOMPANHADO DE LEGUMES GRATINADOS", category: "PRATOS" },
+            { id: "p122", name: "ROCAMBOLE DE PEIXE 400G KTM", category: "PRATOS" },
+            { id: "p123", name: "ROCAMBOLE DE PEIXE, AOCMPANHADO DE ARROZ INTEGRAL COM COUVE KTM", category: "PRATOS" },
+            { id: "p124", name: "ROLINHO DE CARNE 400G KTM", category: "PRATOS" },
+            { id: "p125", name: "ROLINHOS DE FRANGO AO AÇAFRÃO RECH. COM LEG KTM", category: "PRATOS" },
+            { id: "p126", name: "ROLINHOS EMPANADOS DE BERINJELA KTM", category: "PRATOS" },
+            { id: "p127", name: "ROLINHOS EMPANADOS DE BERINJELA RECHEADOS COM CREME DE RICOTA TEMPERADA KTM", category: "PRATOS" },
+            { id: "p128", name: "RONDELI DE QUEIJO AO MOLHO ROSE - 300G", category: "PRATOS" },
+            { id: "p129", name: "SLIM - STROGONOFF DE CARNE, ARROZ BRANCO E CUBINHOS DE CENOURA 300G", category: "PRATOS" },
+            { id: "p130", name: "SPAGHETTI DE ABOB VEGGIE LIGHT AO POMODORO - 300G", category: "PRATOS" },
+            { id: "p131", name: "ST PETER AO CREME DE COCO - 300G", category: "PRATOS" },
+            { id: "p132", name: "STROGONOFF DE CARNE, ARROZ BRANCO E BATATA ASSADA CUBOS - 300G", category: "PRATOS" },
+            { id: "p133", name: "STROGONOFFINHO DE CARNE - 300G", category: "PRATOS" },
+            { id: "p134", name: "STROGONOFFINHO DE FRANGO - 300G", category: "PRATOS" },
+            { id: "p135", name: "TIRAS DE FRANGO GRELHADAS LIGHT - 300G", category: "PRATOS" },
+            { id: "p136", name: "TORTA DE BANANA DA TERRA, ACOMPANHADA DE MIX LEGUMES KTM", category: "PRATOS" },
+            { id: "p137", name: "TORTA DE ESPINAFRE COM RICOTA, ACOMPANHADO DE ARROZ INTEGRAL COLORIDO KTM", category: "PRATOS" },
+            { id: "p138", name: "TORTA DE PEIXE COM DE PURÊ DE BATATA DOCE KTM", category: "PRATOS" },
+            { id: "p139", name: "TRIGOSTOSO DE FRANGO KTM", category: "PRATOS" },
+            // GULOSEIMAS (62)
+            { id: "g1", name: "AMENDOIM HELENA MENDORATO", category: "GULOSEIMAS" },
+            { id: "g2", name: "BANANINHA PALMITAL TRADICIONAL", category: "GULOSEIMAS" },
+            { id: "g3", name: "BARRINHA BAUDUCCO CHOCOLATE - 25G", category: "GULOSEIMAS" },
+            { id: "g4", name: "BARRINHA GOIABA BAUDUCCO - 30G - 30G", category: "GULOSEIMAS" },
+            { id: "g5", name: "BATON - 16G", category: "GULOSEIMAS" },
+            { id: "g6", name: "BATON DUO", category: "GULOSEIMAS" },
+            { id: "g7", name: "BATON EXTRA MILK", category: "GULOSEIMAS" },
+            { id: "g8", name: "BEIJO DE LEITE - 23G", category: "GULOSEIMAS" },
+            { id: "g9", name: "BEIJO DE MOÇA DOCES VIEIRA", category: "GULOSEIMAS" },
+            { id: "g10", name: "BIS XTRA ORIGINAL - 45G", category: "GULOSEIMAS" },
+            { id: "g11", name: "BISC SALG HITS SOL QJO 80G 1X80G QTD. 1.00 UN", category: "GULOSEIMAS" },
+            { id: "g12", name: "BISCOITO BAUDUCCO CHOCO BISCUIT - 36G", category: "GULOSEIMAS" },
+            { id: "g13", name: "BISCOITO OREO - 36G", category: "GULOSEIMAS" },
+            { id: "g14", name: "BOLINHO DUPLO CHOCOLATE BAUDUCCO - 40G", category: "GULOSEIMAS" },
+            { id: "g15", name: "BRIGADEIRO DOCES VIEIRA", category: "GULOSEIMAS" },
+            { id: "g16", name: "CHOCOLATE TALENTO AMENDOAS E PASSAS - 25G", category: "GULOSEIMAS" },
+            { id: "g17", name: "CHOCOLATE TALENTO AVELAS 25G - 25G", category: "GULOSEIMAS" },
+            { id: "g18", name: "CHOCOLATE TALENTO AVELAS DIET 25G", category: "GULOSEIMAS" },
+            { id: "g19", name: "CHOCOLATE TALENTO CASTANHA DO PARA - 25G", category: "GULOSEIMAS" },
+            { id: "g20", name: "CHOCOLATE TALENTO MEIO AMARGO AMENDOAS - 25G", category: "GULOSEIMAS" },
+            { id: "g21", name: "CHOKITO - 32G", category: "GULOSEIMAS" },
+            { id: "g22", name: "COCADA BAIANA DOCES VIEIRA", category: "GULOSEIMAS" },
+            { id: "g23", name: "COOKIES CHOCOLATE BAUDUCCO 60G - 60G - 60G", category: "GULOSEIMAS" },
+            { id: "g24", name: "HALLS CEREJA - 28G", category: "GULOSEIMAS" },
+            { id: "g25", name: "HALLS CEREJA ENVELOPE 28G CX C/21 23,8900", category: "GULOSEIMAS" },
+            { id: "g26", name: "HALLS EXTRA FORTE - 28G", category: "GULOSEIMAS" },
+            { id: "g27", name: "HALLS EXTRA FORTE ENVELOPE 28G CX C/21 23,8900", category: "GULOSEIMAS" },
+            { id: "g28", name: "JUJUBA", category: "GULOSEIMAS" },
+            { id: "g29", name: "JUJUBA IOGURTE", category: "GULOSEIMAS" },
+            { id: "g30", name: "KITKAT", category: "GULOSEIMAS" },
+            { id: "g31", name: "KITKAT DARK", category: "GULOSEIMAS" },
+            { id: "g32", name: "KITKAT MINI MOMENTS - 34,6G", category: "GULOSEIMAS" },
+            { id: "g33", name: "KITKAT WHITE", category: "GULOSEIMAS" },
+            { id: "g34", name: "MINI OREO", category: "GULOSEIMAS" },
+            { id: "g35", name: "MMS AMENDOIM 40G", category: "GULOSEIMAS" },
+            { id: "g36", name: "MMS CHOCOLATE 40G", category: "GULOSEIMAS" },
+            { id: "g37", name: "NUTELLA B READY", category: "GULOSEIMAS" },
+            { id: "g38", name: "OURO BRANCO - 20G", category: "GULOSEIMAS" },
+            { id: "g39", name: "PASTILHA TIC TAC MORANGO 14,5G 1X14,5G QTD. 1.00 UN", category: "GULOSEIMAS" },
+            { id: "g40", name: "PAÇOQUITA", category: "GULOSEIMAS" },
+            { id: "g41", name: "PAÇOQUITA DIET", category: "GULOSEIMAS" },
+            { id: "g42", name: "PAÇOQUITA ZERO COM AVEIA", category: "GULOSEIMAS" },
+            { id: "g43", name: "PE DE MOÇA", category: "GULOSEIMAS" },
+            { id: "g44", name: "PETTIZ AMENDOIM CROCANTE 120G", category: "GULOSEIMAS" },
+            { id: "g45", name: "PIPOCA DOCE OK CHIPS", category: "GULOSEIMAS" },
+            { id: "g46", name: "PIPOCA MAGRELA DOCE MELADO", category: "GULOSEIMAS" },
+            { id: "g47", name: "PIPOCA MAGRELA SALGADA", category: "GULOSEIMAS" },
+            { id: "g48", name: "PRESTIGIO", category: "GULOSEIMAS" },
+            { id: "g49", name: "PRESTIGIO BRANCO", category: "GULOSEIMAS" },
+            { id: "g50", name: "PRESTIGIO DARK", category: "GULOSEIMAS" },
+            { id: "g51", name: "SALG FANDANGOS CHURRASCO 35G 1X35G QTD. 1.00 UN", category: "GULOSEIMAS" },
+            { id: "g52", name: "SALGADO TORCIDA PIMENTA MEXICANA 35GRS", category: "GULOSEIMAS" },
+            { id: "g53", name: "SALGADO TORCIDA QUEIJO 35GRS", category: "GULOSEIMAS" },
+            { id: "g54", name: "SNICKERS", category: "GULOSEIMAS" },
+            { id: "g55", name: "SNICKERS BRANCO", category: "GULOSEIMAS" },
+            { id: "g56", name: "SNICKERS DARK", category: "GULOSEIMAS" },
+            { id: "g57", name: "SONHO DE VALSA - 20G", category: "GULOSEIMAS" },
+            { id: "g58", name: "TALENTO CEREAIS E PASSAS - 25G", category: "GULOSEIMAS" },
+            { id: "g59", name: "TRENTO MASSIMO CHOCOLATE", category: "GULOSEIMAS" },
+            { id: "g60", name: "TRENTO MASSIMO DARK", category: "GULOSEIMAS" },
+            { id: "g61", name: "TRENTO WAFER DARK", category: "GULOSEIMAS" },
+            { id: "g62", name: "TUBIN AVELA", category: "GULOSEIMAS" },
+            // OUTROS (7)
+            { id: "o1", name: "ADOÇANTE", category: "OUTROS" },
+            { id: "o2", name: "COLHER DE BAMBU", category: "OUTROS" },
+            { id: "o3", name: "COPOS DESCARTAVEIS - CONTROLE", category: "OUTROS" },
+            { id: "o4", name: "COPOS PARA CAFÉ", category: "OUTROS" },
+            { id: "o5", name: "FACAS DE BAMBU", category: "OUTROS" },
+            { id: "o6", name: "GARFO DE BAMBU", category: "OUTROS" },
+            { id: "o7", name: "MEXEDOR CAFÉ - CONTROLE", category: "OUTROS" }
+        ];
+
+        // Sabores Amaro e Português (CC e CO)
+        const saboresEspecificos = [
+            "EXPRESSO", "CURTO", "DUPLO", "AMERICANO", "CAPPUCCINO", 
+            "CAFÉ COM LEITE", "CAFÉ COM LEITE CURTO", "ACHOCOLATO KITKAT", 
+            "CAPPUCCINO ALPINO", "ACHOCOLATADO ALPINO", "MOCACCINO DOIS FRADES", 
+            "ACHOCOLATADO DOIS FRADES"
+        ];
+
+        // Mapeia array de nomes para objetos {name, category}
+        const mapearSabores = (sabores, maquina) => sabores.map((sabor, index) => ({ id: `c_${maquina}_${index}`, name: sabor, category: maquina }));
+
+        // Estrutura de dados por local
+        const menuData = {
+            "Agnus": {
+                cafes: [
+                    { id: "ag_1", name: "CAFÉ CURTO", category: "Geral" },
+                    { id: "ag_2", name: "CAFÉ LONGO", category: "Geral" },
+                    { id: "ag_3", name: "CAPPUCCINO", category: "Geral" },
+                    { id: "ag_4", name: "CAFÉ PINGADO", category: "Geral" },
+                    { id: "ag_5", name: "MOCACCINO", category: "Geral" },
+                    { id: "ag_6", name: "CAPPUCCINO COM CANELA", category: "Geral" },
+                    { id: "ag_7", name: "CHOCOLATE COM LEITE", category: "Geral" },
+                    { id: "ag_8", name: "CHOCOLATE", category: "Geral" },
+                    { id: "ag_9", name: "AGUA QUENTE", category: "Geral" }
+                ],
+                descartes: descartesPadrao
+            },
+            "Izabel": {
+                cafes: [
+                    { id: "iz_1", name: "CAFÉ CURTO", category: "Geral" },
+                    { id: "iz_2", name: "CAFÉ LONGO", category: "Geral" },
+                    { id: "iz_3", name: "CAFÉ PINGADO", category: "Geral" },
+                    { id: "iz_4", name: "CAPPUCCINO", category: "Geral" },
+                    { id: "iz_5", name: "MOCACCINO", category: "Geral" },
+                    { id: "iz_6", name: "CHOCOLATE", category: "Geral" },
+                    { id: "iz_7", name: "CHOCOLATE COM LEITE", category: "Geral" },
+                    { id: "iz_8", name: "LEITE", category: "Geral" },
+                    { id: "iz_9", name: "CAPPUCCINO COM CANELA", category: "Geral" }
+                ],
+                descartes: descartesPadrao
+            },
+            "Amaro": {
+                cafes: [
+                    ...mapearSabores(saboresEspecificos, "Máquina CC"),
+                    ...mapearSabores(saboresEspecificos, "Máquina CO")
+                ],
+                descartes: descartesPadrao
+            },
+            "Portugues": {
+                cafes: [
+                    ...mapearSabores([
+                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
+                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
+                    ], "Máquina CC"),
+                    ...mapearSabores([
+                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
+                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
+                    ], "Máquina CO"),
+                    ...mapearSabores([
+                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
+                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
+                    ], "Máquina DAY")
+                ],
+                descartes: descartesPadrao
+            }
+        };
+
+        // --- STREAMING_CHUNK:Estado e Navegação ---
+        const state = {
+            location: null,
+            action: null,
+            currentQuantities: {},
+            history: []
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('main > div > div[id^="screen-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goHome() {
+            state.location = null;
+            state.action = null;
+            document.getElementById('btn-home').classList.add('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+            showScreen('screen-location');
+        }
+
+        function goBack() {
+            if (state.action) {
+                state.action = null;
+                showScreen('screen-action');
+                document.getElementById('bottom-bar').classList.add('hidden');
+            } else {
+                goHome();
+            }
+        }
+
+        function selectLocation(loc) {
+            state.location = loc;
+            document.getElementById('title-location-action').textContent = loc;
+            document.getElementById('btn-home').classList.remove('hidden');
+            updateHistoryUI();
+            showScreen('screen-action');
+        }
+
+        function selectAction(act) {
+            state.action = act;
+            state.currentQuantities = {}; // Reseta as quantidades
+            
+            // Seta a data de hoje por padrão
+            document.getElementById('entry-date').valueAsDate = new Date();
+            
+            document.getElementById('label-location').textContent = state.location;
+            document.getElementById('label-action').textContent = act === 'cafe' ? 'Café' : 'Descartes';
+            
+            // Controle da barra de pesquisa
+            const searchContainer = document.getElementById('search-container');
+            const searchInput = document.getElementById('search-input');
+            if(act === 'descarte') {
+                searchContainer.classList.remove('hidden');
+                searchInput.value = ''; // Limpa a busca
+            } else {
+                searchContainer.classList.add('hidden');
+            }
+
+            renderItems();
+
+            showScreen('screen-entry');
+            document.getElementById('bottom-bar').classList.remove('hidden');
+        }
+
+        // --- STREAMING_CHUNK:Renderização dos Itens e Pesquisa ---
+        function filterItems() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const items = document.querySelectorAll('.item-row');
+            const categories = document.querySelectorAll('.category-header');
+
+            // Filtra os itens
+            items.forEach(item => {
+                const name = item.getAttribute('data-name').toLowerCase();
+                if (name.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Oculta categorias vazias
+            categories.forEach(cat => {
+                const categoryName = cat.getAttribute('data-category');
+                const visibleItemsInCategory = document.querySelectorAll(`.item-row[data-category="${categoryName}"][style="display: flex;"]`);
+                
+                // Se o termo estiver vazio, mostra tudo. Se não, verifica se tem filho visível
+                if (searchTerm === '') {
+                     cat.style.display = 'block';
+                     items.forEach(i => i.style.display = 'flex');
+                } else {
+                    if (visibleItemsInCategory.length === 0) {
+                        cat.style.display = 'none';
+                    } else {
+                        cat.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        function renderItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = ''; // Limpa
+
+            let itemsToRender = [];
+            if (state.action === 'cafe') {
+                itemsToRender = menuData[state.location].cafes;
+            } else {
+                itemsToRender = menuData[state.location].descartes;
+            }
+
+            // Agrupa por categoria
+            const groupedItems = itemsToRender.reduce((acc, item) => {
+                if (!acc[item.category]) acc[item.category] = [];
+                acc[item.category].push(item);
+                return acc;
+            }, {});
+
+            for (const [category, items] of Object.entries(groupedItems)) {
+                // Título da Categoria
+                const catHeader = document.createElement('h3');
+                catHeader.className = 'text-xs font-bold text-gray-400 uppercase tracking-wider mt-6 mb-2 ml-1 category-header';
+                catHeader.textContent = category;
+                catHeader.setAttribute('data-category', category);
+                container.appendChild(catHeader);
+
+                // Produtos
+                items.forEach(item => {
+                    if (state.currentQuantities[item.name] === undefined) {
+                        state.currentQuantities[item.name] = 0;
+                    }
+                    const currentVal = state.currentQuantities[item.name];
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item-row bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between';
+                    itemDiv.setAttribute('data-name', item.name);
+                    itemDiv.setAttribute('data-category', category);
+                    
+                    // ID seguro
+                    const safeId = "qty-" + item.id;
+
+                    itemDiv.innerHTML = `
+                        <div class="flex-1 pr-2">
+                            <h4 class="font-semibold text-gray-800 leading-tight text-sm">${item.name}</h4>
+                        </div>
+                        <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-200">
+                            <button onclick="updateQty('${item.name}', -1, '${safeId}')" class="w-10 h-10 flex items-center justify-center rounded-md bg-white text-gray-600 shadow-sm border border-gray-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation">
+                                <i data-lucide="minus" class="w-4 h-4"></i>
+                            </button>
+                            <input type="number" inputmode="numeric" pattern="[0-9]*" id="${safeId}" value="${currentVal}" onchange="manualQtyUpdate('${item.name}', this.value, '${safeId}')" class="w-12 h-10 text-center font-bold text-lg text-gray-800 bg-transparent border-none focus:ring-0 focus:outline-none appearance-none m-0 p-0">
+                            <button onclick="updateQty('${item.name}', 1, '${safeId}')" class="w-10 h-10 flex items-center justify-center rounded-md bg-[#132616] text-[#D4B872] shadow-sm hover:bg-[#1a331e] active:bg-[#0c1a0e] touch-manipulation">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(itemDiv);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // --- STREAMING_CHUNK:Atualização de Quantidades e Salvar ---
+        function updateQty(itemName, change, inputId) {
+            let current = state.currentQuantities[itemName] || 0;
+            let newVal = current + change;
+            if (newVal < 0) newVal = 0;
+            
+            state.currentQuantities[itemName] = newVal;
+            document.getElementById(inputId).value = newVal;
+        }
+
+        function manualQtyUpdate(itemName, value, inputId) {
+            let newVal = parseInt(value, 10);
+            // Tratamento caso a pessoa digite algo inválido ou negativo
+            if (isNaN(newVal) || newVal < 0) {
+                newVal = 0;
+            }
+            state.currentQuantities[itemName] = newVal;
+            document.getElementById(inputId).value = newVal;
+        }
+
+        async function saveEntry() {
+            const dateStr = document.getElementById('entry-date').value;
+            if (!dateStr) {
+                alert("Por favor, selecione uma data.");
+                return;
+            }
+
+            // NOVA LÓGICA: Cria um array de objetos, um para cada produto
+            const filledItems = [];
+            let summaryTextArray = []; // Para mostrar no histórico visual do app
+            
+            for (const [name, qty] of Object.entries(state.currentQuantities)) {
+                if (qty > 0) {
+                    // Tenta achar a categoria correta do item para enviar pro banco
+                    let itemCategory = "Geral";
+                    
+                    // Procura nos itens renderizados na tela para pegar a categoria (Máquina CC, SANDUICHES, etc)
+                    const itemElement = document.querySelector(`.item-row[data-name="${name}"]`);
+                    if(itemElement) {
+                         itemCategory = itemElement.getAttribute('data-category');
+                    }
+
+                    filledItems.push({
+                        name: name,
+                        qty: qty,
+                        category: itemCategory
+                    });
+                    
+                    summaryTextArray.push(`${qty}x ${name}`);
+                }
+            }
+
+            if (filledItems.length === 0) {
+                alert("Nenhuma quantidade foi informada. Preencha pelo menos um item.");
+                return;
+            }
+
+            // NOVO FORMATO DO RECORD ENVIADO PARA O APPS SCRIPT
+            const record = {
+                date: dateStr,
+                location: state.location,
+                type: state.action === 'cafe' ? 'Café' : 'Descarte',
+                items: filledItems, // Envia o array separadinho
+                timestamp: new Date().toLocaleTimeString('pt-BR')
+            };
+
+            // Muda o botão para modo "Carregando"
+            const btnSave = document.querySelector('button[onclick="saveEntry()"]');
+            const originalText = btnSave.innerHTML;
+            btnSave.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Salvando...';
+            btnSave.disabled = true;
+
+            try {
+                // !!! COLOQUE A SUA URL AQUI EMBAIXO !!!
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbwxVU0O_1zgReo4AudPNTjKe-uUA8dXApKKqMdj_IRCBmeeK_hpwWzvnL46g82aK42i/exec'; 
+                
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(record) // Envia o objeto JSON com o array 'items'
+                });
+
+                // Adiciona no histórico local (apenas visual no celular)
+                state.history.unshift({
+                    type: record.type,
+                    timestamp: record.timestamp,
+                    location: record.location,
+                    summary: summaryTextArray.join(', ')
+                }); 
+                
+                // Mostra Modal de Sucesso
+                const modal = document.getElementById('success-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            } catch (error) {
+                alert("Erro ao enviar os dados. Verifique sua internet.");
+            } finally {
+                // Restaura o botão
+                btnSave.innerHTML = originalText;
+                btnSave.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('success-modal');
+            const content = document.getElementById('modal-content');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                goBack(); // Volta para tela de ação
+                updateHistoryUI(); // Atualiza histórico visual
+            }, 200);
+        }
+
+        function updateHistoryUI() {
+            const container = document.getElementById('history-list');
+            const locationHistory = state.history.filter(h => h.location === state.location);
+            
+            if (locationHistory.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 italic">Nenhum lançamento hoje para este local.</p>';
+                return;
+            }
+
+            container.innerHTML = locationHistory.map(h => `
+                <div class="border-b border-[#132616]/10 pb-2 last:border-0 last:pb-0">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-[#132616]">${h.type}</span>
+                        <span class="text-xs text-gray-500">${h.timestamp}</span>
+                    </div>
+                    <p class="truncate text-gray-600" title="${h.summary}">${h.summary}</p>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
