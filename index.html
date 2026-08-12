@@ -28,7 +28,6 @@
             <button id="btn-home" onclick="goHome()" class="hidden absolute left-0 p-2 text-[#D4B872] bg-white/10 rounded-full hover:bg-white/20 transition-colors">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
-            <!-- Logo Selectus -->
             <img src="https://i.ibb.co/Sq7LN2j/nova-logo-selectus.png" alt="Selectus Alimentos" class="h-14 object-contain rounded">
         </div>
     </header>
@@ -37,13 +36,12 @@
     <main class="flex-1 overflow-y-auto w-full relative">
         <div class="max-w-md mx-auto p-4 pb-24">
             
-            <!-- TELA 1: Seleção de Local (Os 4 Quadradinhos) -->
+            <!-- TELA 1: Seleção de Local -->
             <div id="screen-location" class="space-y-6 fade-in mt-4">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-[#132616]">Selecione o Local</h2>
                     <p class="text-sm text-gray-500 mt-1">Onde você está registrando?</p>
                 </div>
-                <!-- Grid 2x2 para Mobile -->
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="selectLocation('Agnus')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
                         <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
@@ -99,13 +97,11 @@
                     <h3 class="font-semibold text-[#132616] text-sm mb-3 flex items-center gap-2 border-b border-gray-100 pb-2">
                         <i data-lucide="history" class="w-4 h-4 text-[#D4B872]"></i> Registros de Hoje
                     </h3>
-                    <div id="history-list" class="space-y-3 text-sm text-gray-600 max-h-32 overflow-y-auto pr-2">
-                        <!-- Histórico será inserido aqui -->
-                    </div>
+                    <div id="history-list" class="space-y-3 text-sm text-gray-600 max-h-32 overflow-y-auto pr-2"></div>
                 </div>
             </div>
 
-            <!-- TELA 3: Lançamento (Café ou Descartes) -->
+            <!-- TELA 3: Lançamento -->
             <div id="screen-entry" class="hidden fade-in flex flex-col h-full mt-2">
                 <div class="mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center gap-2 text-[#132616] font-bold mb-3">
@@ -121,16 +117,12 @@
                     </div>
                 </div>
 
-                <!-- Barra de Pesquisa -->
                 <div id="search-container" class="hidden mb-4 relative">
                     <i data-lucide="search" class="absolute left-3 top-3 w-5 h-5 text-gray-400"></i>
                     <input type="text" id="search-input" onkeyup="filterItems()" placeholder="Buscar produto..." class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-800 shadow-sm focus:ring-2 focus:ring-[#D4B872] focus:border-[#D4B872] outline-none transition-all">
                 </div>
 
-                <!-- Lista de Itens -->
-                <div id="items-container" class="space-y-3 pb-6 flex-1">
-                    <!-- Itens serão gerados via JS -->
-                </div>
+                <div id="items-container" class="space-y-3 pb-6 flex-1"></div>
             </div>
 
         </div>
@@ -142,10 +134,25 @@
             <button onclick="goBack()" class="px-5 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors">
                 Voltar
             </button>
-            <button onclick="saveEntry()" class="flex-1 bg-[#132616] text-[#D4B872] py-3 rounded-xl font-bold text-lg shadow-md hover:bg-[#1a331e] active:bg-[#0c1a0e] transition-colors flex items-center justify-center gap-2">
+            <button onclick="confirmSave()" class="flex-1 bg-[#132616] text-[#D4B872] py-3 rounded-xl font-bold text-lg shadow-md hover:bg-[#1a331e] active:bg-[#0c1a0e] transition-colors flex items-center justify-center gap-2">
                 <i data-lucide="check-circle" class="w-5 h-5"></i>
                 Salvar Lançamento
             </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação (NOVO) -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-[#132616]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-95 opacity-0" id="confirm-content">
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="help-circle" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#132616] mb-2">Confirmar Lançamento?</h3>
+            <p class="text-sm text-gray-500 mb-6">Você deseja salvar estas quantidades agora?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">Voltar</button>
+                <button onclick="executeSave()" class="flex-1 bg-[#132616] text-[#D4B872] font-bold py-3 rounded-xl shadow-md hover:bg-[#1a331e] transition-colors">Sim, Salvar</button>
+            </div>
         </div>
     </div>
 
@@ -156,7 +163,7 @@
                 <i data-lucide="check" class="w-10 h-10"></i>
             </div>
             <h3 class="text-2xl font-bold text-[#132616] mb-2">Salvo com Sucesso!</h3>
-            <p class="text-gray-500 mb-6">Os dados foram registrados no histórico local.</p>
+            <p class="text-gray-500 mb-6">Os dados foram registrados na planilha.</p>
             <button onclick="closeModal()" class="w-full bg-[#132616] text-[#D4B872] font-semibold py-3 rounded-xl hover:bg-[#1a331e] transition-colors">
                 Continuar
             </button>
@@ -164,12 +171,12 @@
     </div>
 
     <script>
-        // Inicializa ícones do Lucide
         lucide.createIcons();
 
-        // --- STREAMING_CHUNK:Banco de Dados de Produtos ---
-        
-        // Lista COMPLETA de descartes fornecida pelo usuário
+        // Categorias que exigem LOTE
+        const categoriasPereciveis = ["SANDUICHES", "SALADAS GOURMET", "FRUTAS", "CUSCUZ", "SOBREMESAS"];
+
+        // --- BANCO DE DADOS ---
         const descartesPadrao = [
             // SANDUICHES (5)
             { id: "d1", name: "SANDUICHE DE ATUM", category: "SANDUICHES" },
@@ -509,7 +516,6 @@
             { id: "o7", name: "MEXEDOR CAFÉ - CONTROLE", category: "OUTROS" }
         ];
 
-        // Sabores Únicos para Todos os Cafés
         const saboresEspecificos = [
             "EXPRESSO", "CURTO", "DUPLO", "AMERICANO", "CAPPUCCINO", 
             "CAFÉ COM LEITE", "CAFÉ COM LEITE CURTO", "ACHOCOLATO KITKAT", 
@@ -517,14 +523,12 @@
             "ACHOCOLATADO DOIS FRADES"
         ];
 
-        // LÓGICA DE MAPEAR SABORES
         const mapearSabores = (sabores, maquina) => sabores.map((sabor, index) => ({ 
             id: `c_${maquina.replace(/[^a-zA-Z0-9]/g, '')}_${index}`,
             name: sabor, 
             category: maquina 
         }));
 
-        // Estrutura de dados por local - Agora todos puxam a lista atualizada
         const menuData = {
             "Agnus": {
                 cafes: mapearSabores(saboresEspecificos, "Geral"),
@@ -551,13 +555,17 @@
             }
         };
 
-        // --- STREAMING_CHUNK:Estado e Navegação ---
+        // --- ESTADO ---
         const state = {
             location: null,
             action: null,
             currentQuantities: {}, 
+            currentLotes: {}, // NOVO: Armazena os lotes
             history: []
         };
+
+        let pendingRecord = null;
+        let pendingSummary = [];
 
         function showScreen(screenId) {
             document.querySelectorAll('main > div > div[id^="screen-"]').forEach(el => el.classList.add('hidden'));
@@ -593,6 +601,7 @@
         function selectAction(act) {
             state.action = act;
             state.currentQuantities = {}; 
+            state.currentLotes = {}; // Reseta os lotes
             
             document.getElementById('entry-date').valueAsDate = new Date();
             
@@ -609,12 +618,10 @@
             }
 
             renderItems();
-
             showScreen('screen-entry');
             document.getElementById('bottom-bar').classList.remove('hidden');
         }
 
-        // --- STREAMING_CHUNK:Renderização dos Itens e Pesquisa ---
         function filterItems() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const items = document.querySelectorAll('.item-row');
@@ -650,12 +657,7 @@
             const container = document.getElementById('items-container');
             container.innerHTML = ''; 
 
-            let itemsToRender = [];
-            if (state.action === 'cafe') {
-                itemsToRender = menuData[state.location].cafes;
-            } else {
-                itemsToRender = menuData[state.location].descartes;
-            }
+            let itemsToRender = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
 
             const groupedItems = itemsToRender.reduce((acc, item) => {
                 if (!acc[item.category]) acc[item.category] = [];
@@ -677,27 +679,41 @@
                         state.currentQuantities[uniqueKey] = 0;
                     }
                     const currentVal = state.currentQuantities[uniqueKey];
+                    const currentLote = state.currentLotes[uniqueKey] || "";
+                    
+                    // Verifica se é perecível
+                    const isPerecivel = categoriasPereciveis.includes(category) && state.action === 'descarte';
 
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = 'item-row bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between';
+                    itemDiv.className = 'item-row bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between';
                     itemDiv.setAttribute('data-name', item.name);
                     itemDiv.setAttribute('data-category', category);
                     
                     const safeId = "qty-" + item.id;
 
                     itemDiv.innerHTML = `
-                        <div class="flex-1 pr-2">
-                            <h4 class="font-semibold text-gray-800 leading-tight text-sm">${item.name}</h4>
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex-1 pr-2">
+                                <h4 class="font-semibold text-gray-800 leading-tight text-sm">${item.name}</h4>
+                            </div>
+                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-200">
+                                <button onclick="updateQty('${uniqueKey}', -1, '${safeId}', ${isPerecivel})" class="w-10 h-10 flex items-center justify-center rounded-md bg-white text-gray-600 shadow-sm border border-gray-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation">
+                                    <i data-lucide="minus" class="w-4 h-4"></i>
+                                </button>
+                                <input type="number" inputmode="numeric" pattern="[0-9]*" id="${safeId}" value="${currentVal}" onchange="manualQtyUpdate('${uniqueKey}', this.value, '${safeId}', ${isPerecivel})" class="w-12 h-10 text-center font-bold text-lg text-gray-800 bg-transparent border-none focus:ring-0 focus:outline-none appearance-none m-0 p-0">
+                                <button onclick="updateQty('${uniqueKey}', 1, '${safeId}', ${isPerecivel})" class="w-10 h-10 flex items-center justify-center rounded-md bg-[#132616] text-[#D4B872] shadow-sm hover:bg-[#1a331e] active:bg-[#0c1a0e] touch-manipulation">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-200">
-                            <button onclick="updateQty('${uniqueKey}', -1, '${safeId}')" class="w-10 h-10 flex items-center justify-center rounded-md bg-white text-gray-600 shadow-sm border border-gray-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation">
-                                <i data-lucide="minus" class="w-4 h-4"></i>
-                            </button>
-                            <input type="number" inputmode="numeric" pattern="[0-9]*" id="${safeId}" value="${currentVal}" onchange="manualQtyUpdate('${uniqueKey}', this.value, '${safeId}')" class="w-12 h-10 text-center font-bold text-lg text-gray-800 bg-transparent border-none focus:ring-0 focus:outline-none appearance-none m-0 p-0">
-                            <button onclick="updateQty('${uniqueKey}', 1, '${safeId}')" class="w-10 h-10 flex items-center justify-center rounded-md bg-[#132616] text-[#D4B872] shadow-sm hover:bg-[#1a331e] active:bg-[#0c1a0e] touch-manipulation">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                            </button>
-                        </div>
+                        ${isPerecivel ? `
+                            <div id="lote-wrapper-${safeId}" class="mt-3 w-full transition-all duration-300 ${currentVal > 0 ? 'block' : 'hidden'}">
+                                <div class="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden">
+                                    <div class="px-3 bg-yellow-100 text-yellow-800 text-xs font-bold border-r border-yellow-200 py-2">LOTE</div>
+                                    <input type="text" id="lote-${safeId}" value="${currentLote}" onchange="updateLote('${uniqueKey}', this.value)" placeholder="Digite o Lote (Obrigatório)" class="w-full p-2 text-sm bg-transparent outline-none focus:ring-0 text-gray-800 font-medium">
+                                </div>
+                            </div>
+                        ` : ''}
                     `;
                     container.appendChild(itemDiv);
                 });
@@ -705,26 +721,53 @@
             lucide.createIcons();
         }
 
-        // --- STREAMING_CHUNK:Atualização de Quantidades e Salvar ---
-        function updateQty(itemKey, change, inputId) {
+        function updateQty(itemKey, change, inputId, isPerecivel) {
             let current = state.currentQuantities[itemKey] || 0;
             let newVal = current + change;
             if (newVal < 0) newVal = 0;
             
             state.currentQuantities[itemKey] = newVal;
             document.getElementById(inputId).value = newVal;
+
+            // Mostra ou esconde o campo de Lote
+            if (isPerecivel) {
+                const wrapper = document.getElementById('lote-wrapper-' + inputId);
+                if (newVal > 0) {
+                    wrapper.classList.remove('hidden');
+                    wrapper.classList.add('block');
+                } else {
+                    wrapper.classList.remove('block');
+                    wrapper.classList.add('hidden');
+                }
+            }
         }
 
-        function manualQtyUpdate(itemKey, value, inputId) {
+        function manualQtyUpdate(itemKey, value, inputId, isPerecivel) {
             let newVal = parseInt(value, 10);
             if (isNaN(newVal) || newVal < 0) {
                 newVal = 0;
             }
             state.currentQuantities[itemKey] = newVal;
             document.getElementById(inputId).value = newVal;
+
+            if (isPerecivel) {
+                const wrapper = document.getElementById('lote-wrapper-' + inputId);
+                if (newVal > 0) {
+                    wrapper.classList.remove('hidden');
+                    wrapper.classList.add('block');
+                } else {
+                    wrapper.classList.remove('block');
+                    wrapper.classList.add('hidden');
+                }
+            }
         }
 
-        async function saveEntry() {
+        function updateLote(itemKey, value) {
+            state.currentLotes[itemKey] = value;
+        }
+
+        // TELA DE CONFIRMAÇÃO
+        function confirmSave() {
             const dateStr = document.getElementById('entry-date').value;
             if (!dateStr) {
                 alert("Por favor, selecione uma data.");
@@ -733,40 +776,82 @@
 
             const filledItems = [];
             let summaryTextArray = []; 
-            
             let itemsToSearch = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
 
+            // Validação de Lotes e Montagem do Pacote
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
                 if (qty > 0) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
                     
                     if (foundItem) {
+                        const isPerecivel = categoriasPereciveis.includes(foundItem.category);
+                        const lote = state.currentLotes[uniqueKey] || "";
+
+                        // Bloqueia se for perecível e não tiver lote
+                        if (isPerecivel && state.action === 'descarte' && !lote.trim()) {
+                            alert(`Por favor, preencha o LOTE para o produto: ${foundItem.name}`);
+                            
+                            // Tenta focar no campo vazio
+                            const loteInput = document.getElementById(`lote-qty-${foundItem.id}`);
+                            if(loteInput) loteInput.focus();
+                            return; 
+                        }
+
                         filledItems.push({
                             name: foundItem.name,
                             qty: qty,
-                            category: foundItem.category 
+                            category: foundItem.category,
+                            lote: lote.trim()
                         });
                         
                         let summaryName = foundItem.category !== 'Geral' ? `${foundItem.name} (${foundItem.category})` : foundItem.name;
+                        if (lote.trim()) summaryName += ` [Lote: ${lote.trim()}]`;
                         summaryTextArray.push(`${qty}x ${summaryName}`);
                     }
                 }
             }
 
             if (filledItems.length === 0) {
-                alert("Nenhuma quantidade foi informada. Preencha pelo menos um item.");
+                alert("Nenhuma quantidade foi informada. Adicione pelo menos um item.");
                 return;
             }
 
-            const record = {
+            // Armazena temporariamente para o ExecuteSave
+            pendingRecord = {
                 date: dateStr,
                 location: state.location,
                 type: state.action === 'cafe' ? 'Café' : 'Descarte',
                 items: filledItems, 
                 timestamp: new Date().toLocaleTimeString('pt-BR')
             };
+            pendingSummary = summaryTextArray;
 
-            const btnSave = document.querySelector('button[onclick="saveEntry()"]');
+            // Abre o modal de Confirmação
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            const content = document.getElementById('confirm-content');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        async function executeSave() {
+            closeConfirmModal();
+
+            const btnSave = document.querySelector('button[onclick="confirmSave()"]');
             const originalText = btnSave.innerHTML;
             btnSave.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Salvando...';
             btnSave.disabled = true;
@@ -781,14 +866,14 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(record) 
+                    body: JSON.stringify(pendingRecord) 
                 });
 
                 state.history.unshift({
-                    type: record.type,
-                    timestamp: record.timestamp,
-                    location: record.location,
-                    summary: summaryTextArray.join(', ')
+                    type: pendingRecord.type,
+                    timestamp: pendingRecord.timestamp,
+                    location: pendingRecord.location,
+                    summary: pendingSummary.join(', ')
                 }); 
                 
                 const modal = document.getElementById('success-modal');
@@ -804,6 +889,8 @@
                 btnSave.innerHTML = originalText;
                 btnSave.disabled = false;
                 lucide.createIcons();
+                pendingRecord = null;
+                pendingSummary = [];
             }
         }
 
