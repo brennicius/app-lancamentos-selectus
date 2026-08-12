@@ -509,7 +509,7 @@
             { id: "o7", name: "MEXEDOR CAFÉ - CONTROLE", category: "OUTROS" }
         ];
 
-        // Sabores Amaro e Português (CC e CO)
+        // Sabores Únicos para Todos os Cafés
         const saboresEspecificos = [
             "EXPRESSO", "CURTO", "DUPLO", "AMERICANO", "CAPPUCCINO", 
             "CAFÉ COM LEITE", "CAFÉ COM LEITE CURTO", "ACHOCOLATO KITKAT", 
@@ -517,41 +517,21 @@
             "ACHOCOLATADO DOIS FRADES"
         ];
 
-        // NOVA LÓGICA DE MAPEAR SABORES: Gera um ID perfeito sem espaços para evitar conflito
+        // LÓGICA DE MAPEAR SABORES
         const mapearSabores = (sabores, maquina) => sabores.map((sabor, index) => ({ 
-            id: `c_${maquina.replace(/[^a-zA-Z0-9]/g, '')}_${index}`, // Tira os espaços do nome da máquina
+            id: `c_${maquina.replace(/[^a-zA-Z0-9]/g, '')}_${index}`,
             name: sabor, 
             category: maquina 
         }));
 
-        // Estrutura de dados por local
+        // Estrutura de dados por local - Agora todos puxam a lista atualizada
         const menuData = {
             "Agnus": {
-                cafes: [
-                    { id: "ag_1", name: "CAFÉ CURTO", category: "Geral" },
-                    { id: "ag_2", name: "CAFÉ LONGO", category: "Geral" },
-                    { id: "ag_3", name: "CAPPUCCINO", category: "Geral" },
-                    { id: "ag_4", name: "CAFÉ PINGADO", category: "Geral" },
-                    { id: "ag_5", name: "MOCACCINO", category: "Geral" },
-                    { id: "ag_6", name: "CAPPUCCINO COM CANELA", category: "Geral" },
-                    { id: "ag_7", name: "CHOCOLATE COM LEITE", category: "Geral" },
-                    { id: "ag_8", name: "CHOCOLATE", category: "Geral" },
-                    { id: "ag_9", name: "AGUA QUENTE", category: "Geral" }
-                ],
+                cafes: mapearSabores(saboresEspecificos, "Geral"),
                 descartes: descartesPadrao
             },
             "Izabel": {
-                cafes: [
-                    { id: "iz_1", name: "CAFÉ CURTO", category: "Geral" },
-                    { id: "iz_2", name: "CAFÉ LONGO", category: "Geral" },
-                    { id: "iz_3", name: "CAFÉ PINGADO", category: "Geral" },
-                    { id: "iz_4", name: "CAPPUCCINO", category: "Geral" },
-                    { id: "iz_5", name: "MOCACCINO", category: "Geral" },
-                    { id: "iz_6", name: "CHOCOLATE", category: "Geral" },
-                    { id: "iz_7", name: "CHOCOLATE COM LEITE", category: "Geral" },
-                    { id: "iz_8", name: "LEITE", category: "Geral" },
-                    { id: "iz_9", name: "CAPPUCCINO COM CANELA", category: "Geral" }
-                ],
+                cafes: mapearSabores(saboresEspecificos, "Geral"),
                 descartes: descartesPadrao
             },
             "Amaro": {
@@ -563,18 +543,9 @@
             },
             "Portugues": {
                 cafes: [
-                    ...mapearSabores([
-                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
-                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
-                    ], "Máquina CC"),
-                    ...mapearSabores([
-                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
-                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
-                    ], "Máquina CO"),
-                    ...mapearSabores([
-                        "CAFÉ CURTO", "CAFÉ LONGO", "CAFÉ PINGADO", "CAPPUCCINO", 
-                        "MOCACCINO", "CHOCOLATE", "CHOCOLATE COM LEITE", "LEITE", "CAFÉ SOLÚVEL"
-                    ], "Máquina DIRETORIA")
+                    ...mapearSabores(saboresEspecificos, "Máquina CC"),
+                    ...mapearSabores(saboresEspecificos, "Máquina CO"),
+                    ...mapearSabores(saboresEspecificos, "Máquina DIRETORIA")
                 ],
                 descartes: descartesPadrao
             }
@@ -584,7 +555,7 @@
         const state = {
             location: null,
             action: null,
-            currentQuantities: {}, // Agora usará os IDs únicos
+            currentQuantities: {}, 
             history: []
         };
 
@@ -621,20 +592,18 @@
 
         function selectAction(act) {
             state.action = act;
-            state.currentQuantities = {}; // Reseta as quantidades
+            state.currentQuantities = {}; 
             
-            // Seta a data de hoje por padrão
             document.getElementById('entry-date').valueAsDate = new Date();
             
             document.getElementById('label-location').textContent = state.location;
             document.getElementById('label-action').textContent = act === 'cafe' ? 'Café' : 'Descartes';
             
-            // Controle da barra de pesquisa
             const searchContainer = document.getElementById('search-container');
             const searchInput = document.getElementById('search-input');
             if(act === 'descarte') {
                 searchContainer.classList.remove('hidden');
-                searchInput.value = ''; // Limpa a busca
+                searchInput.value = ''; 
             } else {
                 searchContainer.classList.add('hidden');
             }
@@ -651,7 +620,6 @@
             const items = document.querySelectorAll('.item-row');
             const categories = document.querySelectorAll('.category-header');
 
-            // Filtra os itens
             items.forEach(item => {
                 const name = item.getAttribute('data-name').toLowerCase();
                 if (name.includes(searchTerm)) {
@@ -661,7 +629,6 @@
                 }
             });
 
-            // Oculta categorias vazias
             categories.forEach(cat => {
                 const categoryName = cat.getAttribute('data-category');
                 const visibleItemsInCategory = document.querySelectorAll(`.item-row[data-category="${categoryName}"][style="display: flex;"]`);
@@ -690,7 +657,6 @@
                 itemsToRender = menuData[state.location].descartes;
             }
 
-            // Agrupa por categoria
             const groupedItems = itemsToRender.reduce((acc, item) => {
                 if (!acc[item.category]) acc[item.category] = [];
                 acc[item.category].push(item);
@@ -698,16 +664,14 @@
             }, {});
 
             for (const [category, items] of Object.entries(groupedItems)) {
-                // Título da Categoria
                 const catHeader = document.createElement('h3');
                 catHeader.className = 'text-xs font-bold text-gray-400 uppercase tracking-wider mt-6 mb-2 ml-1 category-header';
                 catHeader.textContent = category;
                 catHeader.setAttribute('data-category', category);
                 container.appendChild(catHeader);
 
-                // Produtos
                 items.forEach(item => {
-                    const uniqueKey = item.id; // NOVA LÓGICA: Usa o ID como chave (resolve o bug Amaro/Português)
+                    const uniqueKey = item.id; 
                     
                     if (state.currentQuantities[uniqueKey] === undefined) {
                         state.currentQuantities[uniqueKey] = 0;
@@ -770,10 +734,8 @@
             const filledItems = [];
             let summaryTextArray = []; 
             
-            // Para não depender da tela na hora de salvar, olhamos direto pro banco de dados
             let itemsToSearch = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
 
-            // NOVA LÓGICA: Verifica item por item usando o ID único
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
                 if (qty > 0) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
@@ -782,10 +744,9 @@
                         filledItems.push({
                             name: foundItem.name,
                             qty: qty,
-                            category: foundItem.category // Envia a máquina ou categoria exata
+                            category: foundItem.category 
                         });
                         
-                        // Formata pro histórico local ficar bonitinho
                         let summaryName = foundItem.category !== 'Geral' ? `${foundItem.name} (${foundItem.category})` : foundItem.name;
                         summaryTextArray.push(`${qty}x ${summaryName}`);
                     }
