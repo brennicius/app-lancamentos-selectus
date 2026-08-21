@@ -28,7 +28,6 @@
             <button id="btn-home" onclick="goHome()" class="hidden absolute left-0 p-2 text-[#D4B872] bg-white/10 rounded-full hover:bg-white/20 transition-colors">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
-            <!-- Logo Selectus -->
             <img src="https://i.ibb.co/Sq7LN2j/nova-logo-selectus.png" alt="Selectus Alimentos" class="h-14 object-contain rounded">
         </div>
     </header>
@@ -102,6 +101,17 @@
                 </div>
             </div>
 
+            <!-- TELA 2.5: Seleção de Máquina (Sub-local) -->
+            <div id="screen-machine" class="hidden space-y-6 fade-in mt-4">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-[#132616]" id="title-machine">Selecione a Máquina</h2>
+                    <p class="text-sm text-gray-500 mt-1">Qual máquina você deseja lançar agora?</p>
+                </div>
+                <div id="machine-list" class="grid grid-cols-1 gap-4">
+                    <!-- Botões gerados via JS -->
+                </div>
+            </div>
+
             <!-- TELA 3: Lançamento -->
             <div id="screen-entry" class="hidden fade-in flex flex-col h-full mt-2">
                 <div class="mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -117,7 +127,6 @@
                         <input type="date" id="entry-date" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:ring-2 focus:ring-[#D4B872] focus:border-[#D4B872] outline-none transition-all">
                     </div>
 
-                    <!-- NOVO: Lote Geral -->
                     <div id="lote-geral-container" class="hidden mt-4 pt-4 border-t border-gray-100">
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Lote Geral (Aplica a todos os perecíveis)</label>
                         <div class="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden shadow-sm">
@@ -152,16 +161,24 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação -->
+    <!-- Modal de Confirmação com Lista de Itens -->
     <div id="confirm-modal" class="hidden fixed inset-0 bg-[#132616]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-95 opacity-0" id="confirm-content">
-            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="help-circle" class="w-8 h-8"></i>
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl transform transition-all scale-95 opacity-0 flex flex-col max-h-[90vh]" id="confirm-content">
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="help-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-[#132616] mb-1">Confirmar Lançamento?</h3>
+                <p class="text-sm text-gray-500">Revise os itens abaixo antes de salvar:</p>
             </div>
-            <h3 class="text-xl font-bold text-[#132616] mb-2">Confirmar Lançamento?</h3>
-            <p class="text-sm text-gray-500 mb-6">Você deseja salvar estas quantidades agora?</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirmModal()" class="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">Voltar</button>
+            
+            <!-- Lista de Revisão Dinâmica -->
+            <div id="confirm-items-list" class="bg-gray-50 p-3 rounded-lg overflow-y-auto mb-6 border border-gray-200 flex-1 min-h-[100px]">
+                <!-- Itens gerados via JS -->
+            </div>
+
+            <div class="flex gap-3 mt-auto">
+                <button onclick="closeConfirmModal()" class="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-600 bg-gray-200 hover:bg-gray-300 transition-colors">Voltar</button>
                 <button onclick="executeSave()" class="flex-1 bg-[#132616] text-[#D4B872] font-bold py-3 rounded-xl shadow-md hover:bg-[#1a331e] transition-colors">Sim, Salvar</button>
             </div>
         </div>
@@ -184,7 +201,6 @@
     <script>
         lucide.createIcons();
 
-        // Categorias que exigem LOTE
         const categoriasPereciveis = ["SANDUICHES", "SALADAS GOURMET", "FRUTAS", "CUSCUZ", "SOBREMESAS"];
 
         // --- BANCO DE DADOS ---
@@ -570,6 +586,7 @@
         const state = {
             location: null,
             action: null,
+            machine: null, // Máquina selecionada (Geral, CC, CO, etc)
             currentQuantities: {}, 
             currentLotes: {}, 
             history: []
@@ -586,14 +603,28 @@
         function goHome() {
             state.location = null;
             state.action = null;
+            state.machine = null;
             document.getElementById('btn-home').classList.add('hidden');
             document.getElementById('bottom-bar').classList.add('hidden');
             showScreen('screen-location');
         }
 
         function goBack() {
+            // Se estiver na tela de lançamento (tela 3) para uma máquina específica e existirem várias máquinas
+            if (state.action === 'cafe' && state.machine) {
+                const maquinas = getMaquinas(state.location);
+                if (maquinas.length > 1) {
+                    state.machine = null;
+                    showScreen('screen-machine');
+                    document.getElementById('bottom-bar').classList.add('hidden');
+                    return;
+                }
+            }
+            
+            // Se não, volta para a seleção de ação (tela 2)
             if (state.action) {
                 state.action = null;
+                state.machine = null;
                 showScreen('screen-action');
                 document.getElementById('bottom-bar').classList.add('hidden');
             } else {
@@ -609,35 +640,89 @@
             showScreen('screen-action');
         }
 
+        // Função para saber quantas máquinas tem em um local
+        function getMaquinas(loc) {
+            const cafes = menuData[loc].cafes;
+            return [...new Set(cafes.map(item => item.category))];
+        }
+
         function selectAction(act) {
             state.action = act;
             state.currentQuantities = {}; 
             state.currentLotes = {}; 
+            state.machine = null;
             
             document.getElementById('entry-date').valueAsDate = new Date();
             
+            if (act === 'cafe') {
+                const maquinas = getMaquinas(state.location);
+                
+                // Se o local tiver mais de uma máquina (ex: Português, Amaro), mostra a tela de escolha de máquina
+                if (maquinas.length > 1) {
+                    const machineList = document.getElementById('machine-list');
+                    machineList.innerHTML = '';
+                    maquinas.forEach(maq => {
+                        machineList.innerHTML += `
+                            <button onclick="selectMachine('${maq}')" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-[#D4B872] transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#132616] text-[#D4B872] rounded-full flex items-center justify-center">
+                                        <i data-lucide="coffee" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="font-bold text-gray-800 text-lg">${maq}</span>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                        `;
+                    });
+                    lucide.createIcons();
+                    showScreen('screen-machine');
+                    return;
+                } else {
+                    // Locais com uma máquina só (ex: Agnus) passam direto
+                    state.machine = 'Geral';
+                }
+            }
+
+            prepareEntryScreen();
+        }
+
+        function selectMachine(maq) {
+            state.machine = maq;
+            state.currentQuantities = {}; // Zera os itens toda vez que seleciona a máquina
+            state.currentLotes = {};
+            document.getElementById('entry-date').valueAsDate = new Date();
+            prepareEntryScreen();
+        }
+
+        function prepareEntryScreen() {
             document.getElementById('label-location').textContent = state.location;
-            document.getElementById('label-action').textContent = act === 'cafe' ? 'Café' : 'Descartes';
+            
+            let actionLabel = state.action === 'cafe' ? 'Café' : 'Descartes';
+            if (state.machine && state.machine !== 'Geral') {
+                actionLabel += ` (${state.machine})`;
+            }
+            document.getElementById('label-action').textContent = actionLabel;
             
             const searchContainer = document.getElementById('search-container');
             const searchInput = document.getElementById('search-input');
             const loteGeralContainer = document.getElementById('lote-geral-container');
             const loteGeralInput = document.getElementById('lote-geral-input');
 
-            if(act === 'descarte') {
+            if(state.action === 'descarte') {
                 searchContainer.classList.remove('hidden');
-                loteGeralContainer.classList.remove('hidden'); // Mostra o lote geral
+                loteGeralContainer.classList.remove('hidden'); 
                 searchInput.value = ''; 
                 loteGeralInput.value = ''; 
             } else {
                 searchContainer.classList.add('hidden');
-                loteGeralContainer.classList.add('hidden'); // Esconde no café
+                loteGeralContainer.classList.add('hidden'); 
             }
 
             renderItems();
             showScreen('screen-entry');
             document.getElementById('bottom-bar').classList.remove('hidden');
         }
+
 
         function filterItems() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
@@ -670,11 +755,9 @@
             });
         }
 
-        // --- LÓGICA DO LOTE GERAL ---
         function applyLoteGeral(val) {
             const valUpper = val.toUpperCase();
             
-            // Preenche todos os inputs de lote visíveis no momento
             const allLoteInputs = document.querySelectorAll('input[id^="lote-qty-"]');
             allLoteInputs.forEach(input => {
                 input.value = valUpper;
@@ -682,7 +765,6 @@
                 state.currentLotes[uniqueKey] = valUpper;
             });
 
-            // Força a caixa de texto a ficar em maiúsculo
             const inputGeral = document.getElementById('lote-geral-input');
             if (inputGeral.value !== valUpper) {
                 inputGeral.value = valUpper;
@@ -693,7 +775,17 @@
             const container = document.getElementById('items-container');
             container.innerHTML = ''; 
 
-            let itemsToRender = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
+            let itemsToRender = [];
+            
+            if (state.action === 'cafe') {
+                if (state.machine) {
+                    itemsToRender = menuData[state.location].cafes.filter(item => item.category === state.machine);
+                } else {
+                    itemsToRender = menuData[state.location].cafes;
+                }
+            } else {
+                itemsToRender = menuData[state.location].descartes;
+            }
 
             const groupedItems = itemsToRender.reduce((acc, item) => {
                 if (!acc[item.category]) acc[item.category] = [];
@@ -772,7 +864,6 @@
                     wrapper.classList.remove('hidden');
                     wrapper.classList.add('block');
                     
-                    // Se o Lote Geral estiver preenchido e o individual vazio, puxa automático
                     const globalLote = document.getElementById('lote-geral-input') ? document.getElementById('lote-geral-input').value : "";
                     if (globalLote && (!loteInput.value || loteInput.value === "")) {
                         loteInput.value = globalLote;
@@ -830,6 +921,9 @@
             let summaryTextArray = []; 
             let itemsToSearch = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
 
+            const confirmList = document.getElementById('confirm-items-list');
+            confirmList.innerHTML = ''; // Limpa a lista antes de montar a nova
+
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
                 if (qty > 0) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
@@ -854,6 +948,20 @@
                         });
                         
                         let summaryName = foundItem.category !== 'Geral' ? `${foundItem.name} (${foundItem.category})` : foundItem.name;
+                        
+                        // Formatação para a lista visual da tela de confirmação
+                        let displayLote = lote.trim() ? `<div class="text-[10px] text-yellow-700 bg-yellow-200 px-2 py-0.5 rounded-md inline-block mt-1 font-bold tracking-wider">LOTE: ${lote.trim()}</div>` : '';
+                        
+                        confirmList.innerHTML += `
+                            <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-0">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-800 font-medium leading-tight">${foundItem.name}</span>
+                                    ${displayLote}
+                                </div>
+                                <span class="font-bold text-[#132616] bg-[#132616]/10 px-2.5 py-1 rounded-lg ml-2 whitespace-nowrap">${qty}x</span>
+                            </div>
+                        `;
+
                         if (lote.trim()) summaryName += ` [Lote: ${lote.trim()}]`;
                         summaryTextArray.push(`${qty}x ${summaryName}`);
                     }
@@ -950,8 +1058,26 @@
             
             setTimeout(() => {
                 modal.classList.add('hidden');
-                goBack(); 
                 updateHistoryUI(); 
+                
+                // REDIRECIONAMENTO INTELIGENTE: Volta para a tela de escolha de máquinas se houver mais de uma
+                if (state.action === 'cafe') {
+                    const maquinas = getMaquinas(state.location);
+                    if (maquinas.length > 1) {
+                        state.machine = null; 
+                        state.currentQuantities = {};
+                        state.currentLotes = {};
+                        showScreen('screen-machine');
+                        document.getElementById('bottom-bar').classList.add('hidden');
+                        return;
+                    }
+                }
+                
+                // Fallback (Descartes ou locais de 1 máquina): Volta para a tela de ação
+                state.action = null;
+                state.machine = null;
+                showScreen('screen-action');
+                document.getElementById('bottom-bar').classList.add('hidden');
             }, 200);
         }
 
