@@ -22,6 +22,13 @@
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden selection:bg-[#D4B872]/30 bg-[#f8f9f7]">
 
+    <!-- Tela de Carregamento (NOVO) -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-[#132616]/80 backdrop-blur-sm z-[60] flex flex-col items-center justify-center text-white">
+        <i data-lucide="loader-2" class="w-12 h-12 animate-spin mb-4 text-[#D4B872]"></i>
+        <h3 class="text-xl font-bold mb-1">Buscando dados...</h3>
+        <p class="text-sm text-gray-300">Carregando a última contagem</p>
+    </div>
+
     <!-- Header Fixo (Brand Selectus) -->
     <header class="bg-[#132616] p-4 shadow-md flex-shrink-0 z-10 relative">
         <div class="max-w-md mx-auto flex items-center justify-center relative">
@@ -172,7 +179,6 @@
                 <p class="text-sm text-gray-500">Revise os itens abaixo antes de salvar:</p>
             </div>
             
-            <!-- Lista de Revisão Dinâmica -->
             <div id="confirm-items-list" class="bg-gray-50 p-3 rounded-lg overflow-y-auto mb-6 border border-gray-200 flex-1 min-h-[100px]">
                 <!-- Itens gerados via JS -->
             </div>
@@ -201,9 +207,12 @@
     <script>
         lucide.createIcons();
 
+        // !!! COLOQUE A SUA URL AQUI EMBAIXO !!!
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwxVU0O_1zgReo4AudPNTjKe-uUA8dXApKKqMdj_IRCBmeeK_hpwWzvnL46g82aK42i/exec'; 
+
         const categoriasPereciveis = ["SANDUICHES", "SALADAS GOURMET", "FRUTAS", "CUSCUZ", "SOBREMESAS"];
 
-        // --- BANCO DE DADOS ---
+        // --- BANCO DE DADOS ATUALIZADO ---
         const descartesPadrao = [
             // SANDUICHES
             { id: "d1", name: "SANDUICHE DE ATUM", category: "SANDUICHES" },
@@ -607,8 +616,9 @@
         const state = {
             location: null,
             action: null,
-            machine: null, // Máquina selecionada (Geral, CC, CO, etc)
+            machine: null, 
             currentQuantities: {}, 
+            previousQuantities: {}, 
             currentLotes: {}, 
             history: []
         };
@@ -631,7 +641,6 @@
         }
 
         function goBack() {
-            // Se estiver na tela de lançamento (tela 3) para uma máquina específica e existirem várias máquinas
             if (state.action === 'cafe' && state.machine) {
                 const maquinas = getMaquinas(state.location);
                 if (maquinas.length > 1) {
@@ -642,7 +651,6 @@
                 }
             }
             
-            // Se não, volta para a seleção de ação (tela 2)
             if (state.action) {
                 state.action = null;
                 state.machine = null;
@@ -661,63 +669,41 @@
             showScreen('screen-action');
         }
 
-        // Função para saber quantas máquinas tem em um local
         function getMaquinas(loc) {
             const cafes = menuData[loc].cafes;
             return [...new Set(cafes.map(item => item.category))];
         }
 
-        function selectAction(act) {
-            state.action = act;
-            state.currentQuantities = {}; 
-            state.currentLotes = {}; 
-            state.machine = null;
-            
-            document.getElementById('entry-date').valueAsDate = new Date();
-            
-            if (act === 'cafe') {
-                const maquinas = getMaquinas(state.location);
-                
-                // Se o local tiver mais de uma máquina (ex: Português, Amaro), mostra a tela de escolha de máquina
-                if (maquinas.length > 1) {
-                    const machineList = document.getElementById('machine-list');
-                    machineList.innerHTML = '';
-                    maquinas.forEach(maq => {
-                        machineList.innerHTML += `
-                            <button onclick="selectMachine('${maq}')" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-[#D4B872] transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#132616] text-[#D4B872] rounded-full flex items-center justify-center">
-                                        <i data-lucide="coffee" class="w-5 h-5"></i>
-                                    </div>
-                                    <span class="font-bold text-gray-800 text-lg">${maq}</span>
-                                </div>
-                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
-                            </button>
-                        `;
+        async function loadAndPrepareEntry() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            state.currentQuantities = {};
+            state.previousQuantities = {};
+            state.currentLotes = {};
+
+            if (state.action === 'cafe') {
+                try {
+                    const url = `${scriptURL}?location=${encodeURIComponent(state.location)}&category=${encodeURIComponent(state.machine)}&type=Café`;
+                    const response = await fetch(url);
+                    const latestData = await response.json();
+
+                    const cafesToSearch = menuData[state.location].cafes.filter(item => item.category === state.machine || state.machine === 'Geral');
+                    
+                    cafesToSearch.forEach(item => {
+                        const prevQty = latestData[item.name] || 0;
+                        state.previousQuantities[item.id] = prevQty;
+                        state.currentQuantities[item.id] = prevQty;
                     });
-                    lucide.createIcons();
-                    showScreen('screen-machine');
-                    return;
-                } else {
-                    // Locais com uma máquina só (ex: Agnus) passam direto
-                    state.machine = 'Geral';
+                } catch (err) {
+                    console.error("Erro ao buscar dados:", err);
+                    alert("Não foi possível buscar a contagem anterior. Verifique sua internet.");
                 }
             }
 
-            prepareEntryScreen();
-        }
-
-        function selectMachine(maq) {
-            state.machine = maq;
-            state.currentQuantities = {}; // Zera os itens toda vez que seleciona a máquina
-            state.currentLotes = {};
+            document.getElementById('loading-overlay').classList.add('hidden');
             document.getElementById('entry-date').valueAsDate = new Date();
-            prepareEntryScreen();
-        }
-
-        function prepareEntryScreen() {
-            document.getElementById('label-location').textContent = state.location;
             
+            document.getElementById('label-location').textContent = state.location;
             let actionLabel = state.action === 'cafe' ? 'Café' : 'Descartes';
             if (state.machine && state.machine !== 'Geral') {
                 actionLabel += ` (${state.machine})`;
@@ -744,6 +730,43 @@
             document.getElementById('bottom-bar').classList.remove('hidden');
         }
 
+        function selectAction(act) {
+            state.action = act;
+            state.machine = null;
+            
+            if (act === 'cafe') {
+                const maquinas = getMaquinas(state.location);
+                if (maquinas.length > 1) {
+                    const machineList = document.getElementById('machine-list');
+                    machineList.innerHTML = '';
+                    maquinas.forEach(maq => {
+                        machineList.innerHTML += `
+                            <button onclick="selectMachine('${maq}')" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-[#D4B872] transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-[#132616] text-[#D4B872] rounded-full flex items-center justify-center">
+                                        <i data-lucide="coffee" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="font-bold text-gray-800 text-lg">${maq}</span>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                        `;
+                    });
+                    lucide.createIcons();
+                    showScreen('screen-machine');
+                } else {
+                    state.machine = 'Geral';
+                    loadAndPrepareEntry();
+                }
+            } else {
+                loadAndPrepareEntry();
+            }
+        }
+
+        function selectMachine(maq) {
+            state.machine = maq;
+            loadAndPrepareEntry();
+        }
 
         function filterItems() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
@@ -800,7 +823,7 @@
             
             if (state.action === 'cafe') {
                 if (state.machine) {
-                    itemsToRender = menuData[state.location].cafes.filter(item => item.category === state.machine);
+                    itemsToRender = menuData[state.location].cafes.filter(item => item.category === state.machine || state.machine === 'Geral');
                 } else {
                     itemsToRender = menuData[state.location].cafes;
                 }
@@ -872,8 +895,14 @@
         function updateQty(itemKey, change, inputId, isPerecivel) {
             let current = state.currentQuantities[itemKey] || 0;
             let newVal = current + change;
-            if (newVal < 0) newVal = 0;
             
+            let minQty = state.action === 'cafe' ? (state.previousQuantities[itemKey] || 0) : 0;
+            
+            if (newVal < minQty) {
+                alert(`Atenção: A contagem não pode ser menor que a anterior (${minQty}).`);
+                newVal = minQty;
+            }
+
             state.currentQuantities[itemKey] = newVal;
             document.getElementById(inputId).value = newVal;
 
@@ -899,9 +928,13 @@
 
         function manualQtyUpdate(itemKey, value, inputId, isPerecivel) {
             let newVal = parseInt(value, 10);
-            if (isNaN(newVal) || newVal < 0) {
-                newVal = 0;
+            let minQty = state.action === 'cafe' ? (state.previousQuantities[itemKey] || 0) : 0;
+
+            if (isNaN(newVal) || newVal < minQty) {
+                alert(`Atenção: A contagem não pode ser menor que a anterior (${minQty}).`);
+                newVal = minQty;
             }
+
             state.currentQuantities[itemKey] = newVal;
             document.getElementById(inputId).value = newVal;
 
@@ -943,17 +976,18 @@
             let itemsToSearch = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
 
             const confirmList = document.getElementById('confirm-items-list');
-            confirmList.innerHTML = ''; // Limpa a lista antes de montar a nova
+            confirmList.innerHTML = ''; 
 
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
-                if (qty > 0) {
+                let prevQty = state.action === 'cafe' ? (state.previousQuantities[uniqueKey] || 0) : 0;
+                
+                if (qty > 0 && qty > prevQty) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
                     
                     if (foundItem) {
                         const isPerecivel = categoriasPereciveis.includes(foundItem.category);
                         const lote = state.currentLotes[uniqueKey] || "";
 
-                        // BLOQUEIO: Se for perecível e não tiver Lote
                         if (isPerecivel && state.action === 'descarte' && !lote.trim()) {
                             alert(`Por favor, preencha o LOTE para o produto: ${foundItem.name}`);
                             const loteInput = document.getElementById(`lote-qty-${foundItem.id}`);
@@ -965,12 +999,11 @@
                             name: foundItem.name,
                             qty: qty,
                             category: foundItem.category,
-                            lote: lote.trim() // Salva o Lote no banco
+                            lote: lote.trim() 
                         });
                         
                         let summaryName = foundItem.category !== 'Geral' ? `${foundItem.name} (${foundItem.category})` : foundItem.name;
                         
-                        // Formatação para a lista visual da tela de confirmação
                         let displayLote = lote.trim() ? `<div class="text-[10px] text-yellow-700 bg-yellow-200 px-2 py-0.5 rounded-md inline-block mt-1 font-bold tracking-wider">LOTE: ${lote.trim()}</div>` : '';
                         
                         confirmList.innerHTML += `
@@ -990,7 +1023,7 @@
             }
 
             if (filledItems.length === 0) {
-                alert("Nenhuma quantidade foi informada. Adicione pelo menos um item.");
+                alert("Nenhuma nova quantidade foi informada (tudo igual à contagem anterior). Adicione pelo menos um número novo.");
                 return;
             }
 
@@ -1033,9 +1066,7 @@
             btnSave.disabled = true;
 
             try {
-                // !!! COLOQUE A SUA URL AQUI EMBAIXO !!!
-                const scriptURL = 'https://script.google.com/macros/s/AKfycbwxVU0O_1zgReo4AudPNTjKe-uUA8dXApKKqMdj_IRCBmeeK_hpwWzvnL46g82aK42i/exec'; 
-                
+                // Utiliza a mesma URL de POST
                 await fetch(scriptURL, {
                     method: 'POST',
                     mode: 'no-cors', 
@@ -1081,7 +1112,6 @@
                 modal.classList.add('hidden');
                 updateHistoryUI(); 
                 
-                // REDIRECIONAMENTO INTELIGENTE: Volta para a tela de escolha de máquinas se houver mais de uma
                 if (state.action === 'cafe') {
                     const maquinas = getMaquinas(state.location);
                     if (maquinas.length > 1) {
@@ -1094,7 +1124,6 @@
                     }
                 }
                 
-                // Fallback (Descartes ou locais de 1 máquina): Volta para a tela de ação
                 state.action = null;
                 state.machine = null;
                 showScreen('screen-action');
