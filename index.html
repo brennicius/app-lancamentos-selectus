@@ -979,9 +979,9 @@
             confirmList.innerHTML = ''; 
 
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
-                let prevQty = state.action === 'cafe' ? (state.previousQuantities[uniqueKey] || 0) : 0;
-                
-                if (qty > 0 && qty > prevQty) {
+                // CORREÇÃO AQUI: Para café, envia o odômetro completo (tudo que estiver na tela). 
+                // Para descarte, continua enviando apenas o que for maior que zero.
+                if (state.action === 'cafe' || qty > 0) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
                     
                     if (foundItem) {
@@ -1023,7 +1023,7 @@
             }
 
             if (filledItems.length === 0) {
-                alert("Nenhuma nova quantidade foi informada (tudo igual à contagem anterior). Adicione pelo menos um número novo.");
+                alert("Nenhuma quantidade foi informada. Adicione pelo menos um item.");
                 return;
             }
 
