@@ -979,9 +979,9 @@
             confirmList.innerHTML = ''; 
 
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
-                // CORREÇÃO AQUI: Para café, envia o odômetro completo (tudo que estiver na tela). 
-                // Para descarte, continua enviando apenas o que for maior que zero.
-                if (state.action === 'cafe' || qty > 0) {
+                // AJUSTE AQUI: Salva os itens > 0 (mesmo que a quantidade não tenha mudado) 
+                // e ignora completamente os produtos zerados para limpar o visual.
+                if (qty > 0) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
                     
                     if (foundItem) {
