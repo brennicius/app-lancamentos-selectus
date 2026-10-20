@@ -74,6 +74,12 @@
                         </div>
                         <span class="font-bold text-gray-800 text-lg text-center leading-tight px-2">Português</span>
                     </button>
+                    <button onclick="selectLocation('Amaro 2')" class="aspect-square bg-white rounded-2xl shadow-sm border-2 border-transparent flex flex-col items-center justify-center gap-3 hover:border-[#D4B872] hover:shadow-md transition-all">
+                        <div class="w-14 h-14 bg-[#132616]/5 rounded-full flex items-center justify-center text-[#132616]">
+                            <i data-lucide="building-2" class="w-7 h-7"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 text-lg text-center leading-tight px-2">Santo Amaro 2</span>
+                    </button>
                 </div>
             </div>
 
@@ -85,7 +91,7 @@
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="selectAction('cafe')" class="flex flex-col items-center justify-center gap-3 bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-[#D4B872] hover:bg-[#D4B872]/5 transition-all">
+                    <button id="btn-action-cafe" onclick="selectAction('cafe')" class="flex flex-col items-center justify-center gap-3 bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-[#D4B872] hover:bg-[#D4B872]/5 transition-all">
                         <div class="w-14 h-14 bg-[#132616] text-[#D4B872] rounded-full flex items-center justify-center">
                             <i data-lucide="coffee" class="w-7 h-7"></i>
                         </div>
@@ -602,6 +608,10 @@
                 ],
                 descartes: descartesPadrao
             },
+            "Amaro 2": {
+                cafes: [],
+                descartes: descartesPadrao
+            },
             "Portugues": {
                 cafes: [
                     ...mapearSabores(saboresEspecificos, "Máquina CC"),
@@ -663,6 +673,7 @@
 
         function selectLocation(loc) {
             state.location = loc;
+            document.getElementById('btn-action-cafe').classList.toggle('hidden', menuData[loc].cafes.length === 0);
             document.getElementById('title-location-action').textContent = loc;
             document.getElementById('btn-home').classList.remove('hidden');
             updateHistoryUI();
@@ -731,6 +742,7 @@
         }
 
         function selectAction(act) {
+            if (act === 'cafe' && menuData[state.location].cafes.length === 0) return;
             state.action = act;
             state.machine = null;
             
