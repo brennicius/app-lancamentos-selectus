@@ -674,7 +674,7 @@
         function selectLocation(loc) {
             state.location = loc;
             document.getElementById('btn-action-cafe').classList.toggle('hidden', menuData[loc].cafes.length === 0);
-            document.getElementById('title-location-action').textContent = loc;
+            document.getElementById('title-location-action').textContent = loc === 'Amaro 2' ? 'Santo Amaro 2' : loc;
             document.getElementById('btn-home').classList.remove('hidden');
             updateHistoryUI();
             showScreen('screen-action');
@@ -714,7 +714,7 @@
             document.getElementById('loading-overlay').classList.add('hidden');
             document.getElementById('entry-date').valueAsDate = new Date();
             
-            document.getElementById('label-location').textContent = state.location;
+            document.getElementById('label-location').textContent = state.location === 'Amaro 2' ? 'Santo Amaro 2' : state.location;
             let actionLabel = state.action === 'cafe' ? 'Café' : 'Descartes';
             if (state.machine && state.machine !== 'Geral') {
                 actionLabel += ` (${state.machine})`;
