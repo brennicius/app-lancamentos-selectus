@@ -701,9 +701,11 @@
 
             if (state.action === 'cafe') {
                 try {
-                    const url = `${scriptURL}?location=${encodeURIComponent(state.location)}&category=${encodeURIComponent(state.machine)}&type=Café`;
-                    const response = await fetch(url);
+                    const url = `${scriptURL}?location=${encodeURIComponent(state.location)}&category=${encodeURIComponent(state.machine)}&type=Café&_=${Date.now()}`;
+                    const response = await fetch(url, { cache: 'no-store' });
+                    if (!response.ok) throw new Error('Falha ao consultar a aba do local.');
                     const latestData = await response.json();
+                    if (!latestData || latestData.error) throw new Error(latestData?.error || 'Resposta inválida da planilha.');
 
                     const cafesToSearch = menuData[state.location].cafes.filter(item => item.category === state.machine || state.machine === 'Geral');
                     
@@ -714,7 +716,9 @@
                     });
                 } catch (err) {
                     console.error("Erro ao buscar dados:", err);
-                    alert("Não foi possível buscar a contagem anterior. Verifique sua internet.");
+                    alert("Não foi possível ler a aba deste local. Verifique sua internet e tente novamente.");
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    return;
                 }
             }
 
