@@ -586,6 +586,13 @@
             "ACHOCOLATADO DOIS FRADES"
         ];
 
+        const saboresAmaro = [
+            "EXPRESSO", "CURTO", "DUPLO", "AMERICANO", "CAPPUCCINO",
+            "CAFÉ COM LEITE", "ACHOCOLATO KITKAT", "ÁGUA QUENTE",
+            "CAPPUCCINO ALPINO", "ACHOCOLATADO ALPINO", "MOCACCINO DOIS FRADES",
+            "ACHOCOLATADO DOIS FRADES"
+        ];
+
         const mapearSabores = (sabores, maquina) => sabores.map((sabor, index) => ({ 
             id: `c_${maquina.replace(/[^a-zA-Z0-9]/g, '')}_${index}`,
             name: sabor, 
@@ -603,8 +610,8 @@
             },
             "Amaro": {
                 cafes: [
-                    ...mapearSabores(saboresEspecificos, "Máquina CC"),
-                    ...mapearSabores(saboresEspecificos, "Máquina CO")
+                    ...mapearSabores(saboresAmaro, "Máquina CC"),
+                    ...mapearSabores(saboresAmaro, "Máquina CO")
                 ],
                 descartes: descartesPadrao
             },
