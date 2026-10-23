@@ -140,6 +140,11 @@
                         <input type="date" id="entry-date" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-gray-800 focus:ring-2 focus:ring-[#D4B872] focus:border-[#D4B872] outline-none transition-all">
                     </div>
 
+                    <div id="reset-counters-controls" class="hidden mt-4 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="resetCoffeeCounters()" class="w-full py-2.5 px-4 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 font-semibold hover:bg-amber-100 transition-colors">Zerar</button>
+                        <p id="reset-counters-message" class="text-xs text-gray-500 mt-2">Reiniciou o contador da máquina? Zere para informar uma nova contagem.</p>
+                    </div>
+
                     <div id="lote-geral-container" class="hidden mt-4 pt-4 border-t border-gray-100">
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Lote Geral (Aplica a todos os perecíveis)</label>
                         <div class="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden shadow-sm">
@@ -183,6 +188,7 @@
                 </div>
                 <h3 class="text-xl font-bold text-[#132616] mb-1">Confirmar Lançamento?</h3>
                 <p class="text-sm text-gray-500">Revise os itens abaixo antes de salvar:</p>
+                <p id="reset-confirm-note" class="hidden text-sm text-amber-800 bg-amber-50 rounded-lg p-2 mt-3">Reinício dos contadores: os valores abaixo, inclusive zeros, serão registrados nesta data.</p>
             </div>
             
             <div id="confirm-items-list" class="bg-gray-50 p-3 rounded-lg overflow-y-auto mb-6 border border-gray-200 flex-1 min-h-[100px]">
@@ -637,6 +643,7 @@
             currentQuantities: {}, 
             previousQuantities: {}, 
             currentLotes: {}, 
+            resetCounters: false,
             history: []
         };
 
@@ -695,6 +702,7 @@
         async function loadAndPrepareEntry() {
             document.getElementById('loading-overlay').classList.remove('hidden');
 
+            state.resetCounters = false;
             state.currentQuantities = {};
             state.previousQuantities = {};
             state.currentLotes = {};
@@ -747,6 +755,8 @@
                 loteGeralContainer.classList.add('hidden'); 
             }
 
+            document.getElementById('reset-counters-controls').classList.toggle('hidden', !canResetCoffeeCounters());
+            document.getElementById('reset-counters-message').textContent = 'Reiniciou o contador da máquina? Zere para informar uma nova contagem.';
             renderItems();
             showScreen('screen-entry');
             document.getElementById('bottom-bar').classList.remove('hidden');
@@ -915,11 +925,25 @@
             lucide.createIcons();
         }
 
+        function canResetCoffeeCounters() {
+            return state.action === 'cafe' && !!menuData[state.location]?.cafes.length;
+        }
+
+        function resetCoffeeCounters() {
+            if (!canResetCoffeeCounters()) return;
+            state.resetCounters = true;
+            menuData[state.location].cafes.filter(item => item.category === state.machine).forEach(item => {
+                state.currentQuantities[item.id] = 0;
+            });
+            document.getElementById('reset-counters-message').textContent = 'Contadores zerados. Digite qualquer valor a partir de zero e clique em Salvar para registrar.';
+            renderItems();
+        }
+
         function updateQty(itemKey, change, inputId, isPerecivel) {
             let current = state.currentQuantities[itemKey] || 0;
             let newVal = current + change;
             
-            let minQty = state.action === 'cafe' ? (state.previousQuantities[itemKey] || 0) : 0;
+            let minQty = state.action === 'cafe' && !(state.resetCounters && canResetCoffeeCounters()) ? (state.previousQuantities[itemKey] || 0) : 0;
             
             if (newVal < minQty) {
                 alert(`Atenção: A contagem não pode ser menor que a anterior (${minQty}).`);
@@ -951,7 +975,7 @@
 
         function manualQtyUpdate(itemKey, value, inputId, isPerecivel) {
             let newVal = parseInt(value, 10);
-            let minQty = state.action === 'cafe' ? (state.previousQuantities[itemKey] || 0) : 0;
+            let minQty = state.action === 'cafe' && !(state.resetCounters && canResetCoffeeCounters()) ? (state.previousQuantities[itemKey] || 0) : 0;
 
             if (isNaN(newVal) || newVal < minQty) {
                 alert(`Atenção: A contagem não pode ser menor que a anterior (${minQty}).`);
@@ -994,6 +1018,7 @@
                 return;
             }
 
+            document.getElementById('reset-confirm-note').classList.toggle('hidden', !(state.resetCounters && canResetCoffeeCounters()));
             const filledItems = [];
             let summaryTextArray = []; 
             let itemsToSearch = state.action === 'cafe' ? menuData[state.location].cafes : menuData[state.location].descartes;
@@ -1002,9 +1027,8 @@
             confirmList.innerHTML = ''; 
 
             for (const [uniqueKey, qty] of Object.entries(state.currentQuantities)) {
-                // AJUSTE AQUI: Salva os itens > 0 (mesmo que a quantidade não tenha mudado) 
-                // e ignora completamente os produtos zerados para limpar o visual.
-                if (qty > 0) {
+                // O reinício registra todos os contadores, inclusive os zerados.
+                if (qty > 0 || (qty === 0 && state.resetCounters && canResetCoffeeCounters())) {
                     let foundItem = itemsToSearch.find(i => i.id === uniqueKey);
                     
                     if (foundItem) {
@@ -1052,6 +1076,7 @@
 
             pendingRecord = {
                 date: dateStr,
+                resetCounters: state.resetCounters && canResetCoffeeCounters(),
                 location: state.location,
                 type: state.action === 'cafe' ? 'Café' : 'Descarte',
                 items: filledItems, 
